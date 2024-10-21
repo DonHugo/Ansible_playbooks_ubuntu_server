@@ -1,7 +1,6 @@
 - hosts: all
   tasks:
   - name: create directories if they don't exist
-    sudo: yes
     file:
       path: "{{ item }}"
       state: directory
@@ -15,7 +14,6 @@
       - /home/skogsparlan/photos
       - /home/skogsparlan/remoteappdata
   - name: move mount files to destination
-    sudo: yes
     ansible.builtin.copy:
       src: "{{ item }}"
       dest: /home/test/
