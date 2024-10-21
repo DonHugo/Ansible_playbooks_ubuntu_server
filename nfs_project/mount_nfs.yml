@@ -13,6 +13,8 @@
       - /home/skogsparlan/emp
       - /home/skogsparlan/photos
       - /home/skogsparlan/remoteappdata
+    become: true
+    become_user: root
   - name: move mount files to destination
     ansible.builtin.copy:
       src: "{{ item }}"
@@ -21,3 +23,5 @@
       mode: 600
     with_fileglob:
     - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/*"
+    become: true
+    become_user: root
