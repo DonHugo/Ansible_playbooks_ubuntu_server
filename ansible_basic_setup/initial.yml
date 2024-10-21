@@ -1,0 +1,19 @@
+- hosts: all
+  tasks:
+  - name: create directories if they don't exist
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: hugo
+      group: hugo
+      mode: 0775
+    loop:
+      - /home/ansible
+      - /home/ansible/repos
+      - /home/skogsparlan
+  - name: Clone ansible setup github repository
+    git:
+      repo: https://github.com/ahembree/ansible-hms-docker.git
+      dest: /home/ansible/repos/
+      clone: yes
+      update: yes
