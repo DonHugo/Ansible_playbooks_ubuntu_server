@@ -4,8 +4,8 @@
     file:
       path: "{{ item }}"
       state: directory
-      owner: hugo
-      group: hugo
+      owner: root
+      group: root
       mode: 0775
     loop:
       - /home/ansible
