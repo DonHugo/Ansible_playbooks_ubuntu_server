@@ -11,6 +11,7 @@
       - /home/ansible
       - /home/ansible/repos
       - /home/skogsparlan
+    become: true
     become_user: root
   - name: Clone ansible setup github repository
     git:
