@@ -14,8 +14,7 @@
     become_user: root
   - name: Clone ansible setup github repository
     git:
-      repo: git@github.com:DonHugo/Ansible_playbooks_ubuntu_server.git
+      repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
       dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
-      key_file: /home/semaphore/.ssh/id_ed25519
       clone: yes
       update: yes
