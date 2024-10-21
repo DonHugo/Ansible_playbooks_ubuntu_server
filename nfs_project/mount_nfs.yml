@@ -22,15 +22,15 @@
       owner: hugo
       mode: 600
     loop:
-      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-backup.automount"
-      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-backup.mount"
-      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-data.automount"
-      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-data.mount"
-      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-emp.automount"
-      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-emp.mount"
-      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-photos.automount"
-      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-photos.mount"
-      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-remoteappdata.automount"
-      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-remoteappdata.mount"
+      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-backup.automount"
+      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-backup.mount"
+      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-data.automount"
+      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-data.mount"
+      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-emp.automount"
+      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-emp.mount"
+      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-photos.automount"
+      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-photos.mount"
+      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-remoteappdata.automount"
+      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-remoteappdata.mount"
     become: true
     become_user: root
