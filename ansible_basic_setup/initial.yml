@@ -10,6 +10,7 @@
     loop:
       - /home/ansible/repos
       - /home/skogsparlan
+      - /home/test
     become: true
     become_user: root
   - name: Clone ansible setup github repository

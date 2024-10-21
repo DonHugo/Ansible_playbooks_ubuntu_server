@@ -1,0 +1,25 @@
+- hosts: all
+  tasks:
+  - name: create directories if they don't exist
+    sudo: yes
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: hugo
+      group: users
+      mode: 0775
+    loop:
+      - /home/skogsparlan/backup
+      - /home/skogsparlan/data
+      - /home/skogsparlan/emp
+      - /home/skogsparlan/photos
+      - /home/skogsparlan/remoteappdata
+  - name: move mount files to destination
+    sudo: yes
+    ansible.builtin.copy:
+      src: "{{ item }}"
+      dest: /home/test/
+      owner: hugo
+      mode: 600
+    with_fileglob:
+    - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/*"
