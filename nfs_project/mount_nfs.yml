@@ -21,7 +21,7 @@
       dest: /home/test/
       owner: hugo
       mode: 600
-    with_fileglob:
+    loop:
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-backup.automount"
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-backup.mount"
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-data.automount"
