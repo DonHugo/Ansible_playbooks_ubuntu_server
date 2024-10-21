@@ -10,11 +10,25 @@ sudo apt install ansible
 ```
 
 ## 3. add user semaphore
+   sudo as root
+
+   ```
+   sudo -i
+   ```
+
    Create file
    ```
-   vi etc/sudoers.d/semaphore
+   cd /etc/sudoers.d/
+   vi semaphore
    ```
+   
    add in file
    ```
    semaphore ALL=(ALL) NOPASSWD: ALL
    ```
+   
+   Change permisson on file
+   ```
+   chmod 440 semaphore
+   ```
+

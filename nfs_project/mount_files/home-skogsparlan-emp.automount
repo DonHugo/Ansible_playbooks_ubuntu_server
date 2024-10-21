@@ -1,0 +1,10 @@
+[Unit]
+Description=Datafiler på NAS
+ConditionPathExists=/home/skogsparlan/emp
+
+[Automount]
+Where=/home/skogsparlan/emp
+TimeoutIdleSec=60
+
+[Install]
+WantedBy=multi-user.target

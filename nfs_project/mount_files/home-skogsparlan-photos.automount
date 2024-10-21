@@ -1,0 +1,10 @@
+[Unit]
+Description=Foton och filmklipp på NAS
+ConditionPathExists=/home/skogsparlan/photos
+
+[Automount]
+Where=/home/skogsparlan/photos
+TimeoutIdleSec=60
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Generella datafiler på NAS
+ConditionPathExists=/home/skogsparlan/remoteappdata
+
+[Automount]
+Where=/home/skogsparlan/remoteappdata
+TimeoutIdleSec=60
+
+[Install]
+WantedBy=multi-user.target

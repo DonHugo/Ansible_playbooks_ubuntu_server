@@ -1,0 +1,10 @@
+[Unit]
+Description=Backup datafiler på NAS
+ConditionPathExists=/home/skogsparlan/backup
+
+[Automount]
+Where=/home/skogsparlan/backup
+TimeoutIdleSec=60
+
+[Install]
+WantedBy=multi-user.target

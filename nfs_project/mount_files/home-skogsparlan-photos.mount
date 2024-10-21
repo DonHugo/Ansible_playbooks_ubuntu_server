@@ -1,0 +1,12 @@
+[Unit]
+Description=Foton och filmklipp på NAS
+
+[Mount]
+What=192.168.0.101:/mnt/user/photos
+Where=/home/skogsparlan/photos
+Type=nfs
+Options=_netdev,vers=4,rsize=32768,wsize=32768
+TimeoutSec=30
+
+[Install]
+WantedBy=multi-user.target
