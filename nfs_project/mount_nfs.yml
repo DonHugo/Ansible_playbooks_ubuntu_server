@@ -22,6 +22,7 @@
       owner: hugo
       mode: 600
     with_fileglob:
-    - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/*"
+      - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/*"
+      #- "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/nfs_project/mount_files/home-skogsparlan-backup.automount"
     become: true
     become_user: root
