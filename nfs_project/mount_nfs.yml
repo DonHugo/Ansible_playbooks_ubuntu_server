@@ -19,8 +19,9 @@
     ansible.builtin.copy:
       remote_src: true
       src: "{{ item }}"
-      dest: /home/test/
-      owner: hugo
+      dest: /etc/systemd/system
+      owner: root
+      group: root
       mode: 600
     loop:
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-backup.automount"
@@ -35,3 +36,18 @@
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-remoteappdata.mount"
     become: true
     become_user: root
+  - name: Enable and start services
+    ansible.builtin.service:
+      name: "{{ item }}"
+      enabled: yes
+      state: started
+    loop:
+      - "home-skogsparlan-backup.automount"
+      - "home-skogsparlan-data.automount"
+      - "home-skogsparlan-emp.automount"
+      - "home-skogsparlan-photos.automount"
+      - "home-skogsparlan-remoteappdata.automount"
+
+      
+
+
