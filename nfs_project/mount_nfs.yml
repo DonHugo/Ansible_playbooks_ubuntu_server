@@ -42,11 +42,11 @@
       enabled: yes
       state: started
     loop:
-      - "home-skogsparlan-backup.automount"
-      - "home-skogsparlan-data.automount"
-      - "home-skogsparlan-emp.automount"
-      - "home-skogsparlan-photos.automount"
-      - "home-skogsparlan-remoteappdata.automount"
+      - "home-skogsparlan-backup"
+      - "home-skogsparlan-data"
+      - "home-skogsparlan-emp"
+      - "home-skogsparlan-photos"
+      - "home-skogsparlan-remoteappdata"
 
       
 
