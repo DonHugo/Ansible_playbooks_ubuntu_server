@@ -42,11 +42,11 @@
       enabled: yes
       state: started
     loop:
-      - "home-skogsparlan-backup.automount"
-      - "home-skogsparlan-data.automount"
-      - "home-skogsparlan-emp.automount"
-      - "home-skogsparlan-photos.automount"
-      - "home-skogsparlan-remoteappdata.automount"
+      - "home-skogsparlan-backup.mount"
+      - "home-skogsparlan-data.mount"
+      - "home-skogsparlan-emp.mount"
+      - "home-skogsparlan-photos.mount"
+      - "home-skogsparlan-remoteappdata.mount"
     become: true
     become_user: root  
 
