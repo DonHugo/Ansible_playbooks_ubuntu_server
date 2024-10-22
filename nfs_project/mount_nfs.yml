@@ -22,7 +22,7 @@
       dest: /etc/systemd/system
       owner: root
       group: root
-      mode: 600
+      mode: 755
     loop:
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-backup.automount"
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-backup.mount"
