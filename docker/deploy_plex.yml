@@ -1,6 +1,5 @@
 - hosts: all
-  become: true
-  become_user: root
+  become: yes
   tasks:
   - name: create plex config directory if it don't exist
     file:
@@ -15,28 +14,28 @@
 #  remote_user: support
 #  become: no
   tasks:
-    - name: Create Plex docker image
-      become: yes
-      docker:
-        name: plex
-        hostname: plex
-        image: linuxserver/plex
-        pull: missing
-        state: started
-        restart_policy: always
-        ports:
-        - "32400:32400"
-        - "32400:32400/udp"
-        - "32469:32469"
-        - "32469:32469/udp"
-        - "5353:5353/udp"
-        - "1900:1900/udp"
-        volumes: [
-          '/home/hugo/plex/config/:/config',
-          '/home/skogsparlan/data/:/data',
-          '/home/skogsparlan/emp:/emp'
-        ]
-        env:
-          VERSION: latest
-          PGID: 1000
-          PUID: 1000
+  - name: Create Plex docker image
+    become: yes
+    community.docker.docker_compose_v2:
+      name: plex
+      hostname: plex
+      image: linuxserver/plex
+      pull: missing
+      state: started
+      restart_policy: always
+      ports:
+      - "32400:32400"
+      - "32400:32400/udp"
+      - "32469:32469"
+      - "32469:32469/udp"
+      - "5353:5353/udp"
+      - "1900:1900/udp"
+      volumes: [
+        '/home/hugo/plex/config/:/config',
+        '/home/skogsparlan/data/:/data',
+        '/home/skogsparlan/emp:/emp'
+      ]
+      env:
+        VERSION: latest
+        PGID: 1000
+        PUID: 1000
