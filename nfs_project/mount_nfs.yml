@@ -36,19 +36,38 @@
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-remoteappdata.mount"
     become: true
     become_user: root
-  - name: Enable and start services
-    ansible.builtin.service:
-      name: "{{ item }}"
-      enabled: yes
-      state: started
-    loop:
-      - "home-skogsparlan-backup.mount"
-      - "home-skogsparlan-data.mount"
-      - "home-skogsparlan-emp.mount"
-      - "home-skogsparlan-photos.mount"
-      - "home-skogsparlan-remoteappdata.mount"
+  - name: Enable and start services home-skogsparlan-backup.automount
+    ansible.builtin.raw: sudo systemctl enable --now home-skogsparlan-backup.automount
     become: true
-    become_user: root  
+    become_user: root
+  - name: Enable and start services home-skogsparlan-data.automount
+    ansible.builtin.raw: sudo systemctl enable --now home-skogsparlan-data.automount
+    become: true
+    become_user: root
+  - name: Enable and start services home-skogsparlan-emp.automount
+    ansible.builtin.raw: sudo systemctl enable --now home-skogsparlan-emp.automount
+    become: true
+    become_user: root
+  - name: Enable and start services home-skogsparlan-photos.automount
+    ansible.builtin.raw: sudo systemctl enable --now home-skogsparlan-photos.automount
+    become: true
+    become_user: root
+  - name: Enable and start services home-skogsparlan-remoteappdata.automount
+    ansible.builtin.raw: sudo systemctl enable --now home-skogsparlan-remoteappdata.automount
+    become: true
+    become_user: root
+    # ansible.builtin.service:
+    #   name: "{{ item }}"
+    #   enabled: yes
+    #   state: started
+    # loop:
+    #   - "home-skogsparlan-backup.mount"
+    #   - "home-skogsparlan-data.mount"
+    #   - "home-skogsparlan-emp.mount"
+    #   - "home-skogsparlan-photos.mount"
+    #   - "home-skogsparlan-remoteappdata.mount"
+    # become: true
+    # become_user: root  
 
       
 
