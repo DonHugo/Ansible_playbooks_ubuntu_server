@@ -36,6 +36,12 @@
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-remoteappdata.mount"
     become: true
     become_user: root
+  - name: apt install nfs-common
+    ansible.builtin.apt:
+      name: nfs_common
+      state: present
+    become: true
+    become_user: root
   - name: Enable and start services home-skogsparlan-backup.automount
     ansible.builtin.raw: sudo systemctl enable --now home-skogsparlan-backup.automount
     become: true
