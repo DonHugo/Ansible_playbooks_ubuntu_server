@@ -10,10 +10,10 @@
       mode: 0775
 
 # Deploy docker images
-- hosts: all
+#- hosts: all
 #  remote_user: support
 #  become: no
-  tasks:
+#  tasks:
   - name: Create Plex docker image
     become: yes
     community.docker.docker_container:
