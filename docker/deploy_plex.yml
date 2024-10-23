@@ -16,6 +16,7 @@
   tasks:
   - name: Create Plex docker image
     community.docker.docker_container:
+      name: plex
       image: linuxserver/plex
       state: started
       devices:
