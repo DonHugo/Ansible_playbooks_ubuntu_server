@@ -10,18 +10,17 @@
       mode: 0775
 
 # Deploy docker images
-#- hosts: all
+- hosts: all
 #  remote_user: support
-#  become: no
-#  tasks:
+  become: yes
+  tasks:
   - name: Create Plex docker image
-    become: yes
     community.docker.docker_container:
-    image: linuxserver/plex
-    state: started
-    devices:
-      - "/home/hugo/plex/config/:/config"
-      - "/home/skogsparlan/data/:/data"
-      - "/home/skogsparlan/emp:/emp"
-    ports:
-      - "32400:32400"
+      image: linuxserver/plex
+      state: started
+      devices:
+        - "/home/hugo/plex/config/:/config"
+        - "/home/skogsparlan/data/:/data"
+        - "/home/skogsparlan/emp:/emp"
+      ports:
+        - "32400:32400"
