@@ -15,6 +15,7 @@
 #  become: no
   tasks:
   - name: Create Plex docker image
+    become: yes
     community.docker.docker_container:
     image: linuxserver/plex
     state: started
