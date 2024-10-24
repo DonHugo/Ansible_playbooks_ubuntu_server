@@ -19,6 +19,10 @@
       name: plex
       image: linuxserver/plex
       state: started
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=Europe/Stockholm
       volumes:
         - /home/hugo/plex/config/:/config
         - /home/skogsparlan/data/:/data
