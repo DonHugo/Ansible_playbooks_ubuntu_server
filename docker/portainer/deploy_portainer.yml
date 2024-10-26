@@ -1,0 +1,8 @@
+- name: Run using a project directory
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Create and start services
+      community.docker.docker_compose_v2:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/portainer/
+      register: output
