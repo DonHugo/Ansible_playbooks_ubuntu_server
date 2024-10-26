@@ -5,6 +5,9 @@ services:
     network_mode: host
     environment:
       - VERSION=docker
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Stockholm
     restart: always
     volumes:
       - /home/hugo/plex/config/:/config
