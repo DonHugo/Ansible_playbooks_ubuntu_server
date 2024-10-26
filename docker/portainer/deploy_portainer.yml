@@ -10,6 +10,6 @@
         clone: yes
         update: yes
     - name: Create and start services
-      community.docker.docker_compose_v2:
+      community.docker.docker_compose:
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/portainer/
         register: output
