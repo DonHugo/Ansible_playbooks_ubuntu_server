@@ -4,6 +4,7 @@ services:
     container_name: plex
     network_mode: host
     environment:
+      - PLEX_CLAIM=claim-uMrVb3xbeu2GHapMUffH
       - VERSION=docker
       - PUID=1000
       - PGID=1000
