@@ -1,6 +1,6 @@
 services:
   plex:
-    image: plexinc/pms-docker
+    image: lscr.io/linuxserver/plex:latest
     container_name: plex
     network_mode: host
     environment:
@@ -8,7 +8,8 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Stockholm
-    restart: always
+      - VERSION=docker
+    restart: unless-stopped
     volumes:
       - /home/hugo/plex/config/:/config
       - /home/skogsparlan/data/:/data
