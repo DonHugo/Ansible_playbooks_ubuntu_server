@@ -17,23 +17,13 @@
 #  remote_user: support
   become: yes
   tasks:
-  - name: Create jellyfin docker image
-    community.docker.docker_container:
-      name: jellyfin
-      image: lscr.io/linuxserver/jellyfin:latest
-      state: started
-      environment:
-        - PUID=1000
-        - PGID=1000
-        - TZ=Europe/Stockholm
-        - JELLYFIN_PublishedServerUrl=192.168.0.111 #optional
-      volumes:
-        - /home/hugo/jellyfin/config:/config
-        - /home/hugo/jellyfin/cache:/cache
-        - /home/skogsparlan/data:/media
-        - /home/skogsparlan/emp:/emp
-      ports:
-        - 8096:8096
-        - 8920:8920 #optional
-        - 7359:7359/udp #optional
-        - 1900:1900/udp #optional
+    - name: Clone ansible setup github repository
+      git:
+        repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+        clone: yes
+        update: yes
+    - name: Create and start services
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/jellyfin/
+      register: output
