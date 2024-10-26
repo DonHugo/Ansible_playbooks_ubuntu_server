@@ -2,15 +2,19 @@ services:
   plex:
     image: linuxserver/plex
     container_name: plex
-    network_mode: host
+    network_mode: default
     environment:
-      - PLEX_CLAIM=claim-uMrVb3xbeu2GHapMUffH
-      - VERSION=docker
+      - PLEX_CLAIM=claim-jVr2bah7koyUDKuz26ep
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Stockholm
+      - ADVERTISE_IP: http://192.168.0.111:32400/
+      - ALLOWED_NETWORKS: 192.168.0.1/24
     restart: always
     volumes:
       - /home/hugo/plex/config/:/config
       - /home/skogsparlan/data/:/data
       - /home/skogsparlan/emp:/emp
+
+
+#https://www.plex.tv/claim/
