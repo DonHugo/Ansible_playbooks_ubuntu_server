@@ -1,0 +1,12 @@
+services:
+  plex:
+    image: linuxserver/plex
+    container_name: plex
+    network_mode: host
+    environment:
+      - VERSION=docker
+    restart: always
+    volumes:
+      - /home/hugo/plex/config/:/config
+      - /home/skogsparlan/data/:/data
+      - /home/skogsparlan/emp:/emp
