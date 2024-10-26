@@ -8,7 +8,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Stockholm
-      - ADVERTISE_IP: "http://192.168.0.111:32400/"
+      - ADVERTISE_IP: 192.168.0.111
       - ALLOWED_NETWORKS: 192.168.0.1/24
     restart: always
     volumes:
