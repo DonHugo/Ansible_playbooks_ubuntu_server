@@ -2,13 +2,13 @@ services:
   plex:
     image: linuxserver/plex
     container_name: plex
-    network_mode: default
+    network_mode: host
     environment:
       - PLEX_CLAIM=claim-jVr2bah7koyUDKuz26ep
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Stockholm
-      - ADVERTISE_IP: 192.168.0.111
+      - ADVERTISE_IP: "http://192.168.0.111:32400/"
       - ALLOWED_NETWORKS: 192.168.0.1/24
     restart: always
     volumes:
