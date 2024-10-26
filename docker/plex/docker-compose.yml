@@ -1,8 +1,8 @@
 services:
   plex:
-    image: linuxserver/plex
+    image: plexinc/pms-docker
     container_name: plex
-    network_mode: macvlan
+    network_mode: host
     environment:
       - PLEX_CLAIM=claim-jVr2bah7koyUDKuz26ep
       - PUID=1000
