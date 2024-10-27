@@ -99,28 +99,28 @@ services:
     volumes:
       - /home/hugo/prowlarr/config:/config
       - /home/skogsparlan/data:/data
-  volumes:
-    skogsparlan_movies:
-      driver: local
-      driver_opts:
-        type: 'none'
-        o: 'bind'
-        device: '/home/skogsparlan/data/media/movies'
-    skogsparlan_tv:
-      driver: local
-      driver_opts:
-        type: 'none'
-        o: 'bind'
-        device: '/home/skogsparlan/data/media/tv'
-    skogsparlan_usenet_complete:
-      driver: local
-      driver_opts:
-        type: 'none'
-        o: 'bind'
-        device: '/home/skogsparlan/data/usenet/complete/'
-    skogsparlan_torrent_complete:
-      driver: local
-      driver_opts:
-        type: 'none'
-        o: 'bind'
-        device: '/home/skogsparlan/data/torrents'
+volumes:
+  skogsparlan_movies:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/skogsparlan/data/media/movies'
+  skogsparlan_tv:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/skogsparlan/data/media/tv'
+  skogsparlan_usenet_complete:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/skogsparlan/data/usenet/complete/'
+  skogsparlan_torrent_complete:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/skogsparlan/data/torrents'
