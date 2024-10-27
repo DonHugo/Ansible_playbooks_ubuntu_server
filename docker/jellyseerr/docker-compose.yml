@@ -1,0 +1,15 @@
+---
+services:
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Stockholm
+      - PORT=5055 #optional
+    ports:
+      - 5055:5055
+    volumes:
+      - /home/hugo/jellyseerr:/app/config
+    restart: unless-stopped
