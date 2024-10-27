@@ -15,8 +15,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /home/hugo/radarr/config:/config
-      - /home/skogsparlan/data/usenet/complete/:/downloads
-      - /home/skogsparlan/data/media/movies:/movies
+      - skogsparlan_usenet_complete:/downloads
+      - skogsparlan_movies:/movies
       - /downloads
       - /movies
   sonarr:
@@ -34,8 +34,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /home/hugo/sonarr/config:/config 
-      - /home/skogsparlan/data/usenet/complete/:/downloads
-      - /home/skogsparlan/data/media/tv:/tv
+      - skogsparlan_usenet_complete:/downloads
+      - skogsparlan_tv:/tv
       - /downloads 
       - /tv 
   bazarr:
@@ -53,8 +53,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /home/hugo/bazarr:/config
-      - /home/skogsparlan/data/media/tv:/tv
-      - /home/skogsparlan/data/media/movies:/movies
+      - skogsparlan_tv:/tv
+      - skogsparlan_movies:/movies
   # overseerr:
   #   container_name: overseerr
   #   restart: unless-stopped
@@ -83,8 +83,8 @@ services:
       - TZ=Europe/Stockholm
     volumes:
       - /home/hugo/readarr/config:/config
-      - /home/skogsparlan/data/torrents:/downloads
-      - /home/skogsparlan/data/usenet/complete:/destination
+      - skogsparlan_torrent_complete:/downloads
+      - skogsparlan_usenet_complete:/destination
       - /home/skogsparlan/data/media/books:/books
   prowlarr:
     container_name: prowlarr
@@ -99,3 +99,8 @@ services:
     volumes:
       - /home/hugo/prowlarr/config:/config
       - /home/skogsparlan/data:/data
+  volumes:
+    skogsparlan_movies:/home/skogsparlan/data/media/movies
+    skogsparlan_tv:/home/skogsparlan/data/media/tv
+    skogsparlan_usenet_complete:/home/skogsparlan/data/usenet/complete/
+    skogsparlan_torrent_complete:/home/skogsparlan/data/torrents
