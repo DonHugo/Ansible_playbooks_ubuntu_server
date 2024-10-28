@@ -1,0 +1,13 @@
+- hosts: all
+  become: yes
+  tasks:
+  - name: Clone ansible setup github repository
+    git:
+      repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+      dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+      clone: yes
+      update: yes
+  - name: Tear down existing services
+    community.docker.docker_compose_v2:
+      project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/bazarr/
+      state: absent
