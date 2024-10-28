@@ -32,12 +32,12 @@
 #  remote_user: support
   become: yes
   tasks:
-    - name: Create and start jellyfin
+    - name: Create and start nzbget
       community.docker.docker_compose:
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/nzbget/
       register: output
-      
-    - name: Create and start sonarr
+
+    - name: Create and start qbittorrent
       community.docker.docker_compose:
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/qbittorrent/
       register: output
