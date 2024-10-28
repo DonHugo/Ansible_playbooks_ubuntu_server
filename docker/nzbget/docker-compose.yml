@@ -1,0 +1,18 @@
+version: "3.2"
+services:
+  nzbget:
+    container_name: nzbget
+    image: linuxserver/nzbget:latest
+    restart: unless-stopped
+    ports:
+      - 6789:6789
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Stockholm
+    volumes:
+      - /home/hugo/nzbget:/config
+      - /destination
+      - /downloads
+      - /home/skogsparlan/data/usenet/complete:/destination
+      - /home/skogsparlan/data/usenet/incomplete:/downloads
