@@ -12,7 +12,7 @@ services:
       - TZ=Europe/Stockholm
     volumes:
       - /home/hugo/nzbget:/config
-      - /destination
-      - /downloads
+#      - /destination
+#      - /downloads
       - /home/skogsparlan/data/usenet/complete:/destination
       - /home/skogsparlan/data/usenet/incomplete:/downloads
