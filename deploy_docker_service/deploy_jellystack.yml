@@ -9,11 +9,12 @@
       group: hugo
       mode: 0775
     loop:
+      - /home/hugo/jellyfin
       - /home/hugo/sonarr
       - /home/hugo/radarr
       - /home/hugo/prowlarr
       - /home/hugo/bazarr
-      - /home/hugo/readarr
+      - /home/hugo/jellyseerr
 
   - name: apt install docker-compose-v2
     ansible.builtin.apt:
@@ -24,19 +25,38 @@
     ansible.builtin.apt:
       name: docker-compose
       state: present
-
+  - name: Clone ansible setup github repository
+    git:
+      repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+      dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+      clone: yes
+      update: yes
 # Deploy docker images
 - hosts: all
 #  remote_user: support
   become: yes
   tasks:
-    - name: Clone ansible setup github repository
-      git:
-        repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
-        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
-        clone: yes
-        update: yes
-    - name: Create and start services
+    - name: Create and start jellyfin
       community.docker.docker_compose:
-        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/servarr/
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/jellyfin/
+      register: output
+    - name: Create and start sonarr
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/sonarr/
+      register: output
+    - name: Create and start radarr
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/radarr/
+      register: output
+    - name: Create and start prowlarr
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/prowlarr/
+      register: output
+    - name: Create and start bazarr
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/bazarr/
+      register: output
+    - name: Create and start jellyseerr
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/jellyseerr/
       register: output

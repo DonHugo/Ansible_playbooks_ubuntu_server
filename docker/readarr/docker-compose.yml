@@ -1,0 +1,37 @@
+version: "3.2"
+services:
+  readarr:
+    container_name: readarr
+    image: ghcr.io/hotio/readarr
+    restart: unless-stopped
+    ports:
+      - 8787:8787
+    environment:
+      - PUID=1000
+      - PGID=1000
+#      - UMASK=002
+      - TZ=Europe/Stockholm
+    volumes:
+      - /home/hugo/readarr/config:/config
+      - skogsparlan_torrent_complete:/downloads
+      - skogsparlan_usenet_complete:/destination
+      - skogsparlan_books:/books
+volumes:
+  skogsparlan_usenet_complete:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/skogsparlan/data/usenet/complete/'
+  skogsparlan_torrent_complete:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/skogsparlan/data/torrents'
+  skogsparlan_books:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/skogsparlan/data/media/books'
