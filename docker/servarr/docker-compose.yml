@@ -17,8 +17,8 @@ services:
       - /home/hugo/radarr/config:/config
       - skogsparlan_usenet_complete:/downloads
       - skogsparlan_movies:/movies
-      - /downloads
-      - /movies
+      - /radarr/downloads
+      - /radarr/movies
   sonarr:
     container_name: sonarr
     image: ghcr.io/hotio/sonarr:latest
@@ -36,8 +36,8 @@ services:
       - /home/hugo/sonarr/config:/config 
       - skogsparlan_usenet_complete:/downloads
       - skogsparlan_tv:/tv
-      - /downloads 
-      - /tv 
+      - /sonarr/downloads 
+      - /sonarr/tv 
   bazarr:
     container_name: bazarr
     image: ghcr.io/hotio/bazarr:latest
