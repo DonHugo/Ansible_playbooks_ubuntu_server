@@ -2,7 +2,7 @@
   tasks:
   - name: Copy a new "ntp.conf" file into place, backing up the original if it differs from the copied version
     ansible.builtin.copy:
-      src: /home/hugo/nzbget/nzbget.conf
+      remote_src: /home/hugo/nzbget/nzbget.conf
       dest: /home/skogsparlan/backup/app_backup/nzbget/nzbget.conf
       owner: root
       group: root
