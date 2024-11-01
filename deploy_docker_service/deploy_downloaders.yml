@@ -12,6 +12,15 @@
       - /home/hugo/nzbget
       - /home/hugo/qbittorrent
 
+  - name: Copy a new "ntp.conf" file into place, backing up the original if it differs from the copied version
+    ansible.builtin.copy:
+      remote_src: true
+      src: /home/skogsparlan/backup/app_backup/qbittorrent
+      dest: /home/hugo/qbittorrent/appdata/qBittorrent
+      owner: hugo
+      group: hugo
+      backup: yes
+  
   - name: apt install docker-compose-v2
     ansible.builtin.apt:
       name: docker-compose-v2
@@ -42,14 +51,4 @@
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/qbittorrent/
       register: output
 
-    - name: Copy a new "ntp.conf" file into place, backing up the original if it differs from the copied version
-      ansible.builtin.copy:
-        remote_src: true
-        src: /home/skogsparlan/backup/app_backup/qbittorrent
-        dest: /home/hugo/qbittorrent/appdata/qBittorrent
-        backup: yes
-    - name: Restart qbittorrent
-      community.docker.docker_compose_v2:
-        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/qbittorrent/
-        state: restarted
-      register: output
+
