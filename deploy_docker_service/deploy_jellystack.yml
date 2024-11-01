@@ -33,6 +33,24 @@
       dest: /home/hugo/radarr/config/Backups/
       owner: hugo
       group: hugo
+      backup: yes
+
+  - name: Copy backupfiles for bazarr
+    ansible.builtin.copy:
+      remote_src: true
+      src: /home/skogsparlan/backup/app_backup/bazarr/
+      dest: /home/hugo/bazarr/backup/
+      owner: hugo
+      group: hugo
+      backup: yes
+
+  - name: Copy backupfiles for prowlarr
+    ansible.builtin.copy:
+      remote_src: true
+      src: /home/skogsparlan/backup/app_backup/prowlarr/
+      dest: /home/hugo/prowlarr/config/Backups/
+      owner: hugo
+      group: hugo
       backup: yes  
 
   - name: apt install docker-compose-v2
