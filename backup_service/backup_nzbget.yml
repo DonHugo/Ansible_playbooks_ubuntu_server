@@ -1,4 +1,5 @@
 - hosts: all
+  become: yes
   tasks:
   - name: Copy a new "ntp.conf" file into place, backing up the original if it differs from the copied version
     ansible.builtin.copy:
