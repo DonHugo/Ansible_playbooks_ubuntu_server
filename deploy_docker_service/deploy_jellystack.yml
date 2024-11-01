@@ -1,6 +1,7 @@
 - hosts: all
   become: yes
   tasks:
+  #Create folders and copy backupfiles
   - name: create servarr config directories if they don't exist
     file:
       path: "{{ item }}"
@@ -15,6 +16,24 @@
       - /home/hugo/prowlarr
       - /home/hugo/bazarr
       - /home/hugo/jellyseerr
+
+  - name: Copy backupfiles for sonarr
+    ansible.builtin.copy:
+      remote_src: true
+      src: /home/skogsparlan/backup/app_backup/sonarr/
+      dest: /home/hugo/sonarr/config/Backups/
+      owner: hugo
+      group: hugo
+      backup: yes
+
+  - name: Copy backupfiles for radarr
+    ansible.builtin.copy:
+      remote_src: true
+      src: /home/skogsparlan/backup/app_backup/radarr/
+      dest: /home/hugo/radarr/config/Backups/
+      owner: hugo
+      group: hugo
+      backup: yes  
 
   - name: apt install docker-compose-v2
     ansible.builtin.apt:

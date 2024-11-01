@@ -1,0 +1,14 @@
+- hosts: all
+  become: yes
+  tasks:
+  - name: create directories if they don't exist
+    file:
+      path: "/home/skogsparlan/backup/app_backup/bazarr/"
+      state: directory
+
+  - name: Copy backupfiles to skogsparlan
+    ansible.builtin.copy:
+      remote_src: true
+      src: /home/hugo/bazarr/backup/
+      dest: /home/skogsparlan/backup/app_backup/bazarr/
+      backup: yes
