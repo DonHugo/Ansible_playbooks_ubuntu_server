@@ -5,10 +5,10 @@
     file:
       path: "/home/skogsparlan/backup/app_backup/qbittorrent/"
       state: directory
-      
+
   - name: Copy a new "ntp.conf" file into place, backing up the original if it differs from the copied version
     ansible.builtin.copy:
       remote_src: true
-      src: /home/hugo/qbittorrent/appdata/qBittorrent/qBittorrent.conf
-      dest: /home/skogsparlan/backup/app_backup/qbittorrent/qBittorrent.conf
+      src: /home/hugo/qbittorrent/appdata/qBittorrent/
+      dest: /home/skogsparlan/backup/app_backup/qbittorrent/
       backup: yes
