@@ -1,0 +1,47 @@
+- hosts: all
+  become: yes
+  tasks:
+  #Create folders and copy backupfiles
+  - name: create servarr config directories if they don't exist
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: hugo
+      group: hugo
+      mode: 0775
+    loop:
+      - /home/hugo/stash
+
+  - name: Copy backupfiles for sonarr
+    ansible.builtin.copy:
+      remote_src: true
+      src: /home/skogsparlan/backup/app_backup/stash/config/
+      dest: /home/hugo/stash/config/
+      owner: hugo
+      group: hugo
+      backup: yes  
+
+  - name: apt install docker-compose-v2
+    ansible.builtin.apt:
+      name: docker-compose-v2
+      state: present
+
+  - name: apt install docker-compose
+    ansible.builtin.apt:
+      name: docker-compose
+      state: present
+  - name: Clone ansible setup github repository
+    git:
+      repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+      dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+      clone: yes
+      update: yes
+# Deploy docker images
+- hosts: all
+#  remote_user: support
+  become: yes
+  tasks:
+    - name: Create and start stash
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/stash/
+      register: output
