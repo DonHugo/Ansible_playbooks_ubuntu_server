@@ -6,7 +6,4 @@
       remote_src: true
       src: /home/hugo/nzbget/nzbget.conf
       dest: /home/skogsparlan/backup/app_backup/nzbget/nzbget.conf
-      owner: root
-      group: root
-      mode: '0644'
       backup: yes
