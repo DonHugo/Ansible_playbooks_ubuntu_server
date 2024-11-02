@@ -1,0 +1,82 @@
+---
+- hosts: all
+  become: true
+  task:
+    - name: 'remove unneeded packages'
+      apt:
+        name:
+        - libnet-ssleay-perl
+        - ufw
+        state: absent
+        force_apt_get: yes
+
+    - name: 'download Virtualmin install script'
+      get_url: >
+        url=http://software.virtualmin.com/gpl/scripts/install.sh
+        dest=/root/install.sh
+        mode=0755
+    - name: 'install virtualmin (takes around 10 mins) you can see progress using $ sudo tail -f /root/virtualmin-install.log'
+      tags: non-idem
+      shell: ~/install.sh --hostname {{ hostname }} --minimal --yes
+      args:
+        chdir: /root
+
+    - name: 'delete virtualmin install script'
+      file:
+        path: '/root/install.sh'
+        state: absent
+
+    - name: 'delete virtualmin log'
+      file:
+        path: '/root/virtualmin-install.log'
+        state: absent
+
+    - name: 'create /etc/webmin/authentic-theme folder'
+      file:
+        path: /etc/webmin/authentic-theme
+        state: directory
+        mode: '0755'
+
+    - name: 'add some lines to /etc/webmin/miniserv.conf'
+      lineinfile:
+        path: /etc/webmin/miniserv.conf
+        line: '{{ item }}'
+      with_items:
+        - error_handler_404=404.cgi
+        - error_handler_403=403.cgi
+        - error_handler_401=401.cgi
+        - nolog=\/stats\.cgi\?xhr\-stats\=general
+
+    - name: 'change from plain text passwords to hashed passwords'
+      lineinfile:
+        dest: "/etc/webmin/virtual-server/config"
+        regexp: "^hashpass=0"
+        line: "hashpass=1"
+
+    - name: 'update bind_master setting'
+      lineinfile:
+        dest: "/etc/webmin/virtual-server/config"
+        regexp: "^bind_master="
+        line: "bind_master=server.example.com"
+
+    - name: 'add mysql password to /etc/webmin/mysql/config'
+      lineinfile:
+        path: /etc/webmin/mysql/config
+        line: pass=your_password
+
+    - name: 'add some lines to /etc/webmin/virtual-server/config'
+      lineinfile:
+        path: /etc/webmin/virtual-server/config
+        line: '{{ item }}'
+      with_items:
+        - allow_symlinks=0
+        - mysql_user_size=80
+        - mysql_size=huge
+        - avail_virtualmin-dav=0
+        - wizard_run=1
+
+    - name: 'check virtualmin config'
+      command: virtualmin check-config
+
+    - name: 'reboot the server'
+      reboot:
