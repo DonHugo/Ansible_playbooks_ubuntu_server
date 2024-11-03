@@ -1,0 +1,32 @@
+---
+- name: Setup NFS Server
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install NFS server package
+      apt:
+        name: nfs-kernel-server
+        state: present
+        update_cache: yes
+
+    - name: Create /backup directory
+      file:
+        path: /backup
+        state: directory
+        owner: nobody
+        group: nogroup
+        mode: '0777'
+
+    - name: Configure NFS exports
+      lineinfile:
+        path: /etc/exports
+        line: "/backup *(rw,sync,no_subtree_check)"
+
+    - name: Export the shared directories
+      command: exportfs -ra
+
+    - name: Ensure NFS server is enabled and running
+      systemd:
+        name: nfs-kernel-server
+        enabled: yes
+        state: started
