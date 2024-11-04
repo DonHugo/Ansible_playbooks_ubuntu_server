@@ -21,4 +21,9 @@ echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEMTk0d/AOl8g5UmzGjO0ih7tEbUbnaz7Zflk3
 sudo chown semaphore:semaphore /home/semaphore/.ssh/authorized_keys
 sudo chmod 600 /home/semaphore/.ssh/authorized_keys
 
-echo "User semaphore created, sudoers file configured, SSH keys added to authorized_keys, id_ed25519 keys moved, and ssh reloaded."
+# Prompt for current user password
+read -sp "Enter new password for current user ($USER): " current_user_password
+echo
+echo "$USER:$current_user_password" | sudo chpasswd
+
+echo "User semaphore created, sudoers file configured, SSH keys added to authorized_keys, id_ed25519 keys moved, ssh reloaded, and current user password changed."
