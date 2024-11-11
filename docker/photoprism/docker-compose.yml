@@ -53,7 +53,7 @@ services:
     working_dir: "/photoprism" # do not change or remove
     ## Storage Folders: "~" is a shortcut for your home directory, "." for the current directory
     volumes:
-      - "/home/kistan/photo:/photoprism/originals"          # Original media files (DO NOT REMOVE)
+      - "/home/skogsparlan/photo:/photoprism/originals"          # Original media files (DO NOT REMOVE)
       # - "/example/family:/photoprism/originals/family" # *Additional* media folders can be mounted like this
       - "/home/hugo/photoprism/Import:/photoprism/import"                  # *Optional* base folder from which files can be imported to originals
       - "/home/hugo/photoprism/storage:/photoprism/storage"                  # *Writable* storage folder for cache, database, and sidecar files (DO NOT REMOVE)
