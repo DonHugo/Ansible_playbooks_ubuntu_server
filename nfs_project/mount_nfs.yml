@@ -1,12 +1,12 @@
 - hosts: all
   tasks:
   - name: create directories if they don't exist
-    file:
+    ansible.builtin.file:
       path: "{{ item }}"
       state: directory
       owner: hugo
       group: users
-      mode: 0775
+      mode: '0775'
     loop:
       - /home/skogsparlan/backup
       - /home/skogsparlan/data
@@ -22,8 +22,7 @@
       dest: /etc/systemd/system
       owner: root
       group: root
-      mode: 755
-    loop:
+    with_items:
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-backup.automount"
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-backup.mount"
       - "/home/ansible/repos/Ansible_playbooks_ubuntu_server/nfs_project/mount_files/home-skogsparlan-data.automount"

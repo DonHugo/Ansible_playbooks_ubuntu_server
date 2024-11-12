@@ -1,8 +1,3 @@
-# Server setup
-
-## 1. add user semaphore
-```
-cat << 'EOF' > setup_user_semaphore.sh
 #!/bin/bash
 
 # Prompt for semaphore user password
@@ -32,11 +27,3 @@ echo
 echo "$USER:$current_user_password" | sudo chpasswd
 
 echo "User semaphore created, sudoers file configured, SSH keys added to authorized_keys, id_ed25519 keys moved, ssh reloaded, and current user password changed."
-EOF
-
-chmod +x setup_user_semaphore.sh
-sudo ./setup_user_semaphore.sh
-```
----
-
-
