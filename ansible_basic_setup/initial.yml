@@ -1,4 +1,5 @@
 - hosts: all
+  become: yes
   tasks:
   - name: create directories if they don't exist
     file:
