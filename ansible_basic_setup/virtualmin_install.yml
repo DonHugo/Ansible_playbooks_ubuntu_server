@@ -1,0 +1,42 @@
+---
+- name: Install and setup Virtualmin on Ubuntu server
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required dependencies
+      apt:
+        name: 
+          - wget
+          - software-properties-common
+        state: present
+
+    - name: Download Virtualmin installation script
+      get_url:
+        url: http://software.virtualmin.com/gpl/scripts/install.sh
+        dest: /tmp/install.sh
+        mode: '0755'
+
+    - name: Run Virtualmin installation script
+      command: /tmp/install.sh
+
+    - name: Ensure Virtualmin service is running
+      service:
+        name: webmin
+        state: started
+        enabled: yes
+
+    - name: Open firewall for Virtualmin
+      ufw:
+        rule: allow
+        port: 10000
+        proto: tcp
+
+    - name: Clean up installation script
+      file:
+        path: /tmp/install.sh
+        state: absent
