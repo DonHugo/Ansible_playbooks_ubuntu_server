@@ -27,9 +27,9 @@ sudo chown semaphore:semaphore /home/semaphore/.ssh/authorized_keys
 sudo chmod 600 /home/semaphore/.ssh/authorized_keys
 
 # Prompt for current user password
-read -sp "Enter new password for current user ($USER): " current_user_password
-echo
-echo "$USER:$current_user_password" | sudo chpasswd
+#read -sp "Enter new password for current user ($USER): " current_user_password
+#echo
+#echo "$USER:$current_user_password" | sudo chpasswd
 
 echo "User semaphore created, sudoers file configured, SSH keys added to authorized_keys, id_ed25519 keys moved, ssh reloaded, and current user password changed."
 EOF
