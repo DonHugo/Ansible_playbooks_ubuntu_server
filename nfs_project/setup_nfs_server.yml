@@ -11,7 +11,7 @@
 
     - name: Create /backup directory
       file:
-        path: /backup
+        path: /mnt/backup
         state: directory
         owner: nobody
         group: nogroup
@@ -20,7 +20,7 @@
     - name: Configure NFS exports
       lineinfile:
         path: /etc/exports
-        line: "/backup *(rw,sync,no_subtree_check)"
+        line: "/mnt/backup *(rw,sync,no_subtree_check)"
 
     - name: Export the shared directories
       command: exportfs -ra
