@@ -11,14 +11,14 @@
     loop:
       - /home/hugo/sonarr
 
-  # - name: Copy backupfiles for sonarr
-  #   ansible.builtin.copy:
-  #     remote_src: true
-  #     src: /home/skogsparlan/backup/app_backup/sonarr/
-  #     dest: /home/hugo/sonarr/
-  #     owner: hugo
-  #     group: hugo
-  #     backup: yes  
+  - name: Copy backupfiles for sonarr
+    ansible.builtin.copy:
+      remote_src: true
+      src: /home/skogsparlan/backup/app_backup/sonarr/
+      dest: /home/hugo/sonarr/
+      owner: hugo
+      group: hugo
+      backup: yes  
 
   - name: apt install docker-compose-v2
     ansible.builtin.apt:
