@@ -12,7 +12,7 @@
     loop:
       - /home/hugo/stash
 
-  - name: Copy backupfiles for sonarr
+  - name: Copy backupfiles for stash
     ansible.builtin.copy:
       remote_src: true
       src: /home/skogsparlan/backup/app_backup/stash/config/

@@ -1,7 +1,7 @@
 - hosts: all
   become: yes
   tasks:
-  - name: create bazarr config directory if it don't exist
+  - name: create homarr config directory if it don't exist
     file:
       path: "{{ item }}"
       state: directory

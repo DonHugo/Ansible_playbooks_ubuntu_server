@@ -1,7 +1,7 @@
 - hosts: all
   become: yes
   tasks:
-  - name: create bazarr config directory if it don't exist
+  - name: create sonarr config directory if it don't exist
     file:
       path: "{{ item }}"
       state: directory
@@ -9,13 +9,13 @@
       group: hugo
       mode: 0775
     loop:
-      - /home/hugo/nzbget
+      - /home/hugo/sonarr
 
-  # - name: Copy backupfiles for nzbget
+  # - name: Copy backupfiles for sonarr
   #   ansible.builtin.copy:
   #     remote_src: true
-  #     src: /home/skogsparlan/backup/app_backup/nzbget/
-  #     dest: /home/hugo/nzbget/
+  #     src: /home/skogsparlan/backup/app_backup/sonarr/
+  #     dest: /home/hugo/sonarr/
   #     owner: hugo
   #     group: hugo
   #     backup: yes  
@@ -39,7 +39,7 @@
 #  remote_user: support
   become: yes
   tasks:
-    - name: Create and start services nzbget
+    - name: Create and start services
       community.docker.docker_compose:
-        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/nzbget/
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/sonarr/
       register: output
