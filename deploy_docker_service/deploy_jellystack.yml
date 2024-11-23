@@ -77,22 +77,42 @@
       community.docker.docker_compose:
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/jellyfin/
       register: output
+- hosts: all
+#  remote_user: support
+  become: yes
+  tasks:
     - name: Create and start sonarr
       community.docker.docker_compose:
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/sonarr/
       register: output
+- hosts: all
+#  remote_user: support
+  become: yes
+  tasks:
     - name: Create and start radarr
       community.docker.docker_compose:
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/radarr/
       register: output
+- hosts: all
+#  remote_user: support
+  become: yes
+  tasks:
     - name: Create and start prowlarr
       community.docker.docker_compose:
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/prowlarr/
       register: output
+- hosts: all
+#  remote_user: support
+  become: yes
+  tasks:
     - name: Create and start bazarr
       community.docker.docker_compose:
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/bazarr/
       register: output
+- hosts: all
+#  remote_user: support
+  become: yes
+  tasks:
     - name: Create and start jellyseerr
       community.docker.docker_compose:
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/jellyseerr/
