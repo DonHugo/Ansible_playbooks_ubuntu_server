@@ -13,25 +13,28 @@ services:
       - TZ=Europe/Stockholm
     volumes:
       - /home/hugo/readarr/config:/config
-      - skogsparlan_torrent_complete:/downloads
-      - skogsparlan_usenet_complete:/destination
-      - skogsparlan_books:/books
-volumes:
-  skogsparlan_usenet_complete:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/skogsparlan/data/usenet/complete/'
-  skogsparlan_torrent_complete:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/skogsparlan/data/torrents'
-  skogsparlan_books:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/skogsparlan/data/media/books'
+      # - skogsparlan_torrent_complete:/downloads
+      # - skogsparlan_usenet_complete:/destination
+      # - skogsparlan_books:/books
+      - /home/skogsparlan/data/torrents:/downloads
+      - /home/skogsparlan/data/usenet/complete/:/destination
+      - /home/skogsparlan/data/media/books:/books
+# volumes:
+#   skogsparlan_usenet_complete:
+#     driver: local
+#     driver_opts:
+#       type: 'none'
+#       o: 'bind'
+#       device: '/home/skogsparlan/data/usenet/complete/'
+#   skogsparlan_torrent_complete:
+#     driver: local
+#     driver_opts:
+#       type: 'none'
+#       o: 'bind'
+#       device: '/home/skogsparlan/data/torrents'
+#   skogsparlan_books:
+#     driver: local
+#     driver_opts:
+#       type: 'none'
+#       o: 'bind'
+#       device: '/home/skogsparlan/data/media/books'

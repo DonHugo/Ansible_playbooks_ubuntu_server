@@ -15,19 +15,21 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /home/hugo/bazarr:/config
-      - skogsparlan_tv:/tv
-      - skogsparlan_movies:/movies
-volumes:
-  skogsparlan_movies:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/skogsparlan/data/media/movies'
-  skogsparlan_tv:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/skogsparlan/data/media/tv'
+      # - skogsparlan_tv:/tv
+      # - skogsparlan_movies:/movies
+      - /home/skogsparlan/data/media/tv:/tv
+      - /home/skogsparlan/data/media/movies:/movies
+# volumes:
+#   skogsparlan_movies:
+#     driver: local
+#     driver_opts:
+#       type: 'none'
+#       o: 'bind'
+#       device: '/home/skogsparlan/data/media/movies'
+#   skogsparlan_tv:
+#     driver: local
+#     driver_opts:
+#       type: 'none'
+#       o: 'bind'
+#       device: '/home/skogsparlan/data/media/tv'
   

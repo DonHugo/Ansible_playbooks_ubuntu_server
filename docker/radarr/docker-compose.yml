@@ -15,21 +15,23 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /home/hugo/radarr/config:/config
-      - skogsparlan_usenet_complete:/downloads
-      - skogsparlan_movies:/movies
+      # - skogsparlan_usenet_complete:/downloads
+      # - skogsparlan_movies:/movies
       - /radarr/downloads
       - /radarr/movies
+      - /home/skogsparlan/data/usenet/complete/:/downloads
+      - /home/skogsparlan/data/media/movies:/movies
   
-volumes:
-  skogsparlan_movies:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/skogsparlan/data/media/movies'
-  skogsparlan_usenet_complete:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/skogsparlan/data/usenet/complete/'
+# volumes:
+#   skogsparlan_movies:
+#     driver: local
+#     driver_opts:
+#       type: 'none'
+#       o: 'bind'
+#       device: '/home/skogsparlan/data/media/movies'
+#   skogsparlan_usenet_complete:
+#     driver: local
+#     driver_opts:
+#       type: 'none'
+#       o: 'bind'
+#       device: '/home/skogsparlan/data/usenet/complete/'

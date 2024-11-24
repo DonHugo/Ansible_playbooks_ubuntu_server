@@ -16,20 +16,22 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /home/hugo/sonarr/config:/config 
-      - skogsparlan_usenet_complete:/downloads
-      - skogsparlan_tv:/tv
-      - /sonarr/downloads 
-      - /sonarr/tv 
-volumes:
-  skogsparlan_tv:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/skogsparlan/data/media/tv'
-  skogsparlan_usenet_complete:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: '/home/skogsparlan/data/usenet/complete/'
+      # - skogsparlan_usenet_complete:/downloads
+      # - skogsparlan_tv:/tv
+      # - /sonarr/downloads 
+      # - /sonarr/tv 
+      - /home/skogsparlan/data/usenet/complete/:/downloads
+      - /home/skogsparlan/data/media/tv:/tv
+# volumes:
+#   skogsparlan_tv:
+#     driver: local
+#     driver_opts:
+#       type: 'none'
+#       o: 'bind'
+#       device: '/home/skogsparlan/data/media/tv'
+#   skogsparlan_usenet_complete:
+#     driver: local
+#     driver_opts:
+#       type: 'none'
+#       o: 'bind'
+#       device: '/home/skogsparlan/data/usenet/complete/'
