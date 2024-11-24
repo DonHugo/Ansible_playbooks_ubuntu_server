@@ -20,7 +20,7 @@ services:
       # - skogsparlan_tv:/tv
       # - /sonarr/downloads 
       # - /sonarr/tv 
-      - /home/skogsparlan/data/usenet/complete/:/downloads
+      - /home/skogsparlan/data/usenet/complete/:/data
       - /home/skogsparlan/data/media/tv:/tv
 # volumes:
 #   skogsparlan_tv:
