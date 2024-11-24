@@ -17,9 +17,9 @@ services:
       - /home/hugo/radarr/config:/config
       # - skogsparlan_usenet_complete:/downloads
       # - skogsparlan_movies:/movies
-      - /radarr/downloads
-      - /radarr/movies
-      - /home/skogsparlan/data/usenet/complete/:/downloads
+      #- /radarr/downloads
+      #- /radarr/movies
+      - /home/skogsparlan/data/usenet/complete/:/data
       - /home/skogsparlan/data/media/movies:/movies
   
 # volumes:
