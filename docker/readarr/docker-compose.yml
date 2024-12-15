@@ -16,9 +16,9 @@ services:
       # - skogsparlan_torrent_complete:/downloads
       # - skogsparlan_usenet_complete:/destination
       # - skogsparlan_books:/books
-      - /home/skogsparlan/data/torrents:/downloads
+      - /home/skogsparlan/data/torrents/:/downloads
       - /home/skogsparlan/data/usenet/complete/:/destination
-      - /home/skogsparlan/data/media/books:/books
+      - /home/skogsparlan/data/media/books/:/books
 # volumes:
 #   skogsparlan_usenet_complete:
 #     driver: local
