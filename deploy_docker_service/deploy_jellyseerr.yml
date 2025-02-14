@@ -1,7 +1,7 @@
 - hosts: all
   become: yes
   tasks:
-  - name: create jellyfin config directory if it don't exist
+  - name: create jellyseerr config directory if it don't exist
     file:
       path: "{{ item }}"
       state: directory
