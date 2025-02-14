@@ -2,7 +2,7 @@
   become: yes
   tasks:
   #Create folders and copy backupfiles
-  - name: create servarr config directories if they don't exist
+  - name: create jellyfin config directories if they don't exist
     file:
       path: "{{ item }}"
       state: directory
