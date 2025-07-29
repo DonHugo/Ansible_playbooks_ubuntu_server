@@ -39,6 +39,12 @@
 - hosts: all
   become: yes
   tasks:
+    - name: Install Python Docker SDK (deb)
+      ansible.builtin.package:
+        name: python3-docker
+        state: present
+      when: ansible_os_family == "Debian"
+      
     - name: Ensure PhotoPrism config directory exists
       ansible.builtin.file:
         path: "{{ item }}"
