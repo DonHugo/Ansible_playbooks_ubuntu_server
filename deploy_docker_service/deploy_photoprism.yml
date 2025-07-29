@@ -44,7 +44,7 @@
         name: python3-docker
         state: present
       when: ansible_os_family == "Debian"
-      
+
     - name: Ensure PhotoPrism config directory exists
       ansible.builtin.file:
         path: "{{ item }}"
@@ -62,8 +62,8 @@
         clone: yes
         update: yes
 
-    - name: Deploy PhotoPrism with existing docker-compose
-      community.docker.docker_compose:
+    - name: Deploy PhotoPrism stack (Compose v2)
+      community.docker.docker_compose_v2:
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/photoprism/
       register: output
 
