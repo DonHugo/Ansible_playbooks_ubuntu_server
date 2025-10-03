@@ -12,7 +12,7 @@ services:
     volumes:
       - /home/hugo/plex/config:/config
       - /home/skogsparlan/data/media:/data
-      - /home/skogsparlan/data/downloads:/downloads
+      - /home/skogsparlan/emp:/emp
       - /dev/dri:/dev/dri  # Intel Quick Sync
     devices:
       - /dev/dri:/dev/dri  # Intel Quick Sync
