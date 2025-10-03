@@ -11,8 +11,8 @@ services:
       - VERSION=docker
     volumes:
       - /home/hugo/plex/config:/config
-      - /home/hugo/media:/data
-      - /home/hugo/downloads:/downloads
+      - /home/skogsparlan/data/media:/data
+      - /home/skogsparlan/data/downloads:/downloads
     restart: unless-stopped
 
 
