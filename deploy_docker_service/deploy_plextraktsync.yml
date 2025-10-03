@@ -1,0 +1,31 @@
+---
+# Deploy PlexTraktSync for direct Plex-Trakt integration
+- hosts: all
+  become: yes
+  tasks:
+    - name: Ensure PlexTraktSync directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: hugo
+        group: hugo
+        mode: 0775
+      loop:
+        - /home/hugo/plextraktsync/config
+        - /home/hugo/plextraktsync/logs
+
+    - name: Clone Ansible setup repository
+      ansible.builtin.git:
+        repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+        clone: yes
+        update: yes
+
+    - name: Create and start PlexTraktSync stack
+      community.docker.docker_compose_v2:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/plextraktsync/
+      register: output
+
+    - name: Show deployment result
+      ansible.builtin.debug:
+        var: output
