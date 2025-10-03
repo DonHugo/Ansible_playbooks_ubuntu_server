@@ -1,0 +1,17 @@
+services:
+  tautulli:
+    image: lscr.io/linuxserver/tautulli:latest
+    container_name: tautulli
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Stockholm
+    volumes:
+      - /home/hugo/tautulli/config:/config
+    ports:
+      - "8181:8181"
+    restart: unless-stopped
+
+# Tautulli - Plex monitoring with Trakt integration
+# Access at http://192.168.0.111:8181
+# Configure Trakt integration in Tautulli settings

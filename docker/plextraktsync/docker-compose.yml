@@ -1,0 +1,18 @@
+services:
+  plextraktsync:
+    image: ghcr.io/taxel/plextraktsync:latest
+    container_name: plextraktsync
+    environment:
+      - PLEX_SERVER=192.168.0.111
+      - PLEX_USERNAME=your_plex_username
+      - PLEX_PASSWORD=your_plex_password
+      - TRAKT_CLIENT_ID=your_trakt_client_id
+      - TRAKT_CLIENT_SECRET=your_trakt_client_secret
+    volumes:
+      - /home/hugo/plextraktsync/config:/app/config
+      - /home/hugo/plextraktsync/logs:/app/logs
+    restart: unless-stopped
+    command: ["python", "-m", "plextraktsync", "sync"]
+
+# PlexTraktSync - Syncs Plex watch history with Trakt.tv
+# Configure your Trakt API credentials in the environment variables
