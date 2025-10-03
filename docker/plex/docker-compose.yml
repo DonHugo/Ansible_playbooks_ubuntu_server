@@ -11,7 +11,7 @@ services:
       - VERSION=docker
     volumes:
       - /home/hugo/plex/config:/config
-      - /home/skogsparlan/data:/data
+      - /home/skogsparlan/data/media:/data
       - /home/skogsparlan/emp:/emp
       - /dev/dri:/dev/dri  # Intel Quick Sync
     devices:
