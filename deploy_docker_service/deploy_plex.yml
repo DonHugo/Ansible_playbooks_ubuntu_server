@@ -77,9 +77,10 @@
         update: yes
 
     - name: Stop and remove existing Plex container
-      community.docker.docker_compose_v2:
-        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/plex/
+      community.docker.docker_container:
+        name: plex
         state: absent
+        force_kill: yes
 
     - name: Create and start Plex stack (Compose v2)
       community.docker.docker_compose_v2:
