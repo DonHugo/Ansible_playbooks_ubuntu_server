@@ -1,0 +1,50 @@
+# IDE and editor files
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Ansible specific
+*.retry
+.ansible/
+ansible.cfg.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+
+# Taskmaster (if it's a local tool)
+.taskmaster/
+
+# Environment and secrets
+.env
+.env.local
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Inventory files with sensitive information
+inventory/
+!inventory/example_inventory.yml
+
+# Backup files
+*.bak
+*.backup

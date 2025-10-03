@@ -11,11 +11,9 @@ services:
       - VERSION=docker
     volumes:
       - /home/hugo/plex/config:/config
-      - /home/skogsparlan/data:/data
-      - /home/skogsparlan/emp:/emp
+      - /home/hugo/media:/data
+      - /home/hugo/downloads:/downloads
     restart: unless-stopped
 
-
-#https://www.plex.tv/claim/
-
-
+# Ubuntu-specific Plex configuration
+# Adjust paths as needed for your media storage
