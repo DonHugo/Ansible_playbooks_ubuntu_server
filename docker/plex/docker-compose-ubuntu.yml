@@ -13,6 +13,9 @@ services:
       - /home/hugo/plex/config:/config
       - /home/hugo/media:/data
       - /home/hugo/downloads:/downloads
+      - /dev/dri:/dev/dri  # Intel Quick Sync
+    devices:
+      - /dev/dri:/dev/dri  # Intel Quick Sync
     restart: unless-stopped
 
 # Ubuntu-specific Plex configuration
