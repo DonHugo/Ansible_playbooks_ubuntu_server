@@ -17,13 +17,12 @@ services:
         max-file: "10"
         max-size: "2m"
     environment:
-      - /home/skogsparlan/emp/sorted=/data/
-      - /home/skogsparlan/data/torrents/complete/emp=/data_2/
-      - /home/hugo/stash/generated=/generated/
-      - /home/hugo/stash/metadata=/metadata/
-      - /home/hugo/stash/cache=/cache/
+      - STASH_STASH=/root/.stash
+      - STASH_GENERATED=/generated
+      - STASH_METADATA=/metadata
+      - STASH_CACHE=/cache
       ## Adjust below to change default port (9999)
-      - 9199=9999
+      - STASH_PORT=9999
     volumes:
       - /etc/localtime:/etc/localtime:ro
       ## Adjust below paths (the left part) to your liking.
@@ -33,7 +32,7 @@ services:
       - /home/hugo/stash/config:/root/.stash
       ## Point this at your collection.
       - /home/skogsparlan/emp:/data
-      - /home/skogsparlan/data/torrents/complete/emp=/data_2/
+      - /home/skogsparlan/data/torrents/complete/emp:/data_2
       ## This is where your stash's metadata lives
       - /home/hugo/stash/metadata:/metadata
       ## Any other cache content.

@@ -21,6 +21,12 @@
       group: hugo
       backup: yes  
 
+  - name: Remove conflicting docker-compose-plugin if present
+    ansible.builtin.apt:
+      name: docker-compose-plugin
+      state: absent
+    ignore_errors: yes
+
   - name: apt install docker-compose-v2
     ansible.builtin.apt:
       name: docker-compose-v2
