@@ -17,7 +17,7 @@ services:
         max-file: "10"
         max-size: "2m"
     environment:
-      - /home/skogsparlan/emp=/data/
+      - /home/skogsparlan/emp/sorted=/data/
       - /home/skogsparlan/data/torrents/complete/emp=/data_2/
       - /home/hugo/stash/generated=/generated/
       - /home/hugo/stash/metadata=/metadata/
