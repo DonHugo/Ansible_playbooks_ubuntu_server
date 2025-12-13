@@ -27,9 +27,9 @@
         state: started
 
 
-    - name: Wait for Komodo periphery on port 8120
+    - name: Wait for Komodo periphery on port 8120 (HTTPS)
       ansible.builtin.uri:
-        url: http://localhost:8120/health
+        url: https://localhost:8120/health
         method: GET
         status_code: 200
         validate_certs: no
