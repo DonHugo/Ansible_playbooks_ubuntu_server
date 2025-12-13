@@ -1,0 +1,54 @@
+- hosts: all
+  become: yes
+  tasks:
+  - name: Get Portainer container full details
+    community.docker.docker_container_info:
+      name: portainer
+    register: portainer_info
+
+  - name: Display Portainer mounts
+    ansible.builtin.debug:
+      msg: "{{ portainer_info.container.Mounts }}"
+
+  - name: Display Portainer command
+    ansible.builtin.debug:
+      msg: "{{ portainer_info.container.Config.Cmd }}"
+
+  - name: Check Docker socket exists and permissions
+    ansible.builtin.stat:
+      path: /var/run/docker.sock
+    register: docker_socket
+
+  - name: Display Docker socket info
+    ansible.builtin.debug:
+      msg: "Socket exists: {{ docker_socket.stat.exists }}, Mode: {{ docker_socket.stat.mode }}, Owner: {{ docker_socket.stat.pw_name }}:{{ docker_socket.stat.gr_name }}"
+
+  - name: Get Portainer real-time logs
+    ansible.builtin.shell:
+      cmd: docker logs portainer --tail 100 2>&1
+    register: full_logs
+    changed_when: false
+
+  - name: Display full Portainer logs
+    ansible.builtin.debug:
+      var: full_logs.stdout_lines
+
+  - name: Check if Portainer data volume exists
+    ansible.builtin.shell:
+      cmd: docker volume inspect portainer_data 2>&1 || echo "Volume not found"
+    register: volume_info
+    changed_when: false
+
+  - name: Display volume info
+    ansible.builtin.debug:
+      var: volume_info.stdout_lines
+
+  - name: List all running containers
+    ansible.builtin.shell:
+      cmd: docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+    register: containers
+    changed_when: false
+
+  - name: Display running containers
+    ansible.builtin.debug:
+      var: containers.stdout_lines
