@@ -1,0 +1,65 @@
+- hosts: all
+  become: yes
+  tasks:
+  - name: Install Docker 27.5.1 packages (compatible with Portainer)
+    ansible.builtin.apt:
+      name:
+        - docker-ce=5:27.5.1-1~ubuntu.24.04~noble
+        - docker-ce-cli=5:27.5.1-1~ubuntu.24.04~noble
+        - docker-ce-rootless-extras=5:27.5.1-1~ubuntu.24.04~noble
+      state: present
+      update_cache: yes
+
+  - name: Hold Docker packages at 27.5.1 to prevent auto-upgrade
+    ansible.builtin.command:
+      cmd: apt-mark hold docker-ce docker-ce-cli docker-ce-rootless-extras
+    register: hold_result
+    changed_when: "'docker-ce set on hold.' in hold_result.stdout or 'docker-ce-cli set on hold.' in hold_result.stdout or 'docker-ce-rootless-extras set on hold.' in hold_result.stdout"
+
+  - name: Display hold result
+    ansible.builtin.debug:
+      var: hold_result.stdout_lines
+
+  - name: Restart Docker service
+    ansible.builtin.service:
+      name: docker
+      state: restarted
+
+  - name: Wait for Docker to be ready
+    ansible.builtin.command:
+      cmd: docker ps
+    register: docker_ps
+    retries: 10
+    delay: 3
+    until: docker_ps.rc == 0
+    changed_when: false
+
+  - name: Display Docker version
+    ansible.builtin.command:
+      cmd: docker version --format '{{ .Server.Version }} (API {{ .Server.APIVersion }})'
+    register: docker_version
+    changed_when: false
+
+  - name: Show Docker version after downgrade
+    ansible.builtin.debug:
+      msg: "Docker server version: {{ docker_version.stdout }}"
+
+  - name: Ensure Portainer container is running after Docker restart
+    community.docker.docker_container:
+      name: portainer
+      state: started
+
+  - name: Wait for Portainer API status endpoint
+    ansible.builtin.uri:
+      url: http://localhost:9000/api/status
+      method: GET
+      status_code: 200
+    register: portainer_status
+    retries: 10
+    delay: 3
+    until: portainer_status.status == 200
+    changed_when: false
+
+  - name: Display Portainer status response
+    ansible.builtin.debug:
+      var: portainer_status.json
