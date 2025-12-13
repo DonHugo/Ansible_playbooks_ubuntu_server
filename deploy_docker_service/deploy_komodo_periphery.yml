@@ -18,13 +18,14 @@
     - name: Run Komodo periphery setup script
       ansible.builtin.command: python3 /tmp/setup-periphery.py
       args:
-        creates: /etc/systemd/system/komodo-periphery.service
-
-    - name: Ensure komodo-periphery service is enabled and started
+        creates: /etc/systemd/system/periphery.service
+ 
+    - name: Ensure periphery service is enabled and started
       ansible.builtin.systemd:
-        name: komodo-periphery
+        name: periphery
         enabled: yes
         state: started
+
 
     - name: Wait for Komodo periphery on port 8120
       ansible.builtin.uri:
