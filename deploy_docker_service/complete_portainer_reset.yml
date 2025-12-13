@@ -24,12 +24,24 @@
       name: portainer/portainer-ce:latest
       source: pull
 
+  - name: Get docker group GID
+    ansible.builtin.command:
+      cmd: getent group docker
+    register: docker_group
+    changed_when: false
+
+  - name: Extract docker GID
+    ansible.builtin.set_fact:
+      docker_gid: "{{ docker_group.stdout.split(':')[2] }}"
+
   - name: Start Portainer container with clean state
     community.docker.docker_container:
       name: portainer
       image: portainer/portainer-ce:latest
       state: started
       restart_policy: unless-stopped
+      groups:
+        - "{{ docker_gid }}"
       ports:
         - "9000:9000"
         - "8000:8000"
