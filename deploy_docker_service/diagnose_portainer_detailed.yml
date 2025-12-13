@@ -1,0 +1,108 @@
+- hosts: all
+  become: yes
+  tasks:
+  - name: Check Docker socket permissions
+    ansible.builtin.stat:
+      path: /var/run/docker.sock
+    register: socket_stat
+
+  - name: Display socket permissions
+    ansible.builtin.debug:
+      msg: "Socket: {{ socket_stat.stat.mode }}, Owner: {{ socket_stat.stat.pw_name }}:{{ socket_stat.stat.gr_name }}"
+
+  - name: Test Docker socket access from host
+    ansible.builtin.command:
+      cmd: docker ps
+    register: docker_ps
+    changed_when: false
+
+  - name: Display docker ps result
+    ansible.builtin.debug:
+      msg: "Docker is accessible from host: {{ docker_ps.rc == 0 }}"
+
+  - name: Get Portainer container details
+    community.docker.docker_container_info:
+      name: portainer
+    register: portainer_info
+
+  - name: Display Portainer mounts
+    ansible.builtin.debug:
+      msg: "{{ portainer_info.container.Mounts }}"
+
+  - name: Check if socket is mounted in container
+    ansible.builtin.command:
+      cmd: docker exec portainer ls -la /var/run/docker.sock
+    register: socket_in_container
+    ignore_errors: yes
+    changed_when: false
+
+  - name: Display socket in container
+    ansible.builtin.debug:
+      var: socket_in_container.stdout_lines
+
+  - name: Test Docker access from inside Portainer container
+    ansible.builtin.command:
+      cmd: docker exec portainer docker ps
+    register: docker_from_portainer
+    ignore_errors: yes
+    changed_when: false
+
+  - name: Display Docker access from Portainer
+    ansible.builtin.debug:
+      msg: "Portainer can access Docker: {{ docker_from_portainer.rc == 0 }}"
+    when: docker_from_portainer.rc is defined
+
+  - name: Show error if Portainer cannot access Docker
+    ansible.builtin.debug:
+      msg: "ERROR: {{ docker_from_portainer.stderr }}"
+    when: docker_from_portainer.rc != 0
+
+  - name: Get full Portainer logs
+    ansible.builtin.command:
+      cmd: docker logs portainer --tail 200
+    register: portainer_logs
+    changed_when: false
+
+  - name: Display Portainer logs
+    ansible.builtin.debug:
+      var: portainer_logs.stdout_lines
+
+  - name: Check if Portainer is listening on port 9000
+    ansible.builtin.wait_for:
+      host: localhost
+      port: 9000
+      timeout: 5
+      state: started
+    register: port_check
+    ignore_errors: yes
+
+  - name: Display port status
+    ansible.builtin.debug:
+      msg: "Portainer port 9000 is {{ 'accessible' if port_check.failed == false else 'not accessible' }}"
+
+  - name: Try to access Portainer API status endpoint
+    ansible.builtin.uri:
+      url: http://localhost:9000/api/status
+      method: GET
+      status_code: 200
+    register: api_status
+    ignore_errors: yes
+
+  - name: Display API status
+    ansible.builtin.debug:
+      msg: "Portainer API is responding: {{ api_status.status == 200 }}"
+    when: api_status.status is defined
+
+  - name: Check Docker group membership
+    ansible.builtin.command:
+      cmd: getent group docker
+    register: docker_group
+    changed_when: false
+
+  - name: Display Docker group members
+    ansible.builtin.debug:
+      var: docker_group.stdout
+
+  - name: Check if Portainer container is running as root
+    ansible.builtin.debug:
+      msg: "Container user: {{ portainer_info.container.Config.User | default('root (default)') }}"
