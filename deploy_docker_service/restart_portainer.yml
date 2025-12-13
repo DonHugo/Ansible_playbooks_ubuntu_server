@@ -1,0 +1,31 @@
+- hosts: all
+  become: yes
+  tasks:
+  - name: Restart Portainer container
+    community.docker.docker_container:
+      name: portainer
+      state: started
+      restart: yes
+    register: restart_output
+
+  - name: Wait for Portainer to start
+    ansible.builtin.pause:
+      seconds: 10
+
+  - name: Get Portainer logs
+    ansible.builtin.command:
+      cmd: docker logs portainer --tail 50
+    register: portainer_logs
+
+  - name: Display Portainer logs
+    ansible.builtin.debug:
+      var: portainer_logs.stdout_lines
+
+  - name: Check Portainer container status
+    community.docker.docker_container_info:
+      name: portainer
+    register: portainer_info
+
+  - name: Display Portainer status
+    ansible.builtin.debug:
+      msg: "Portainer is {{ portainer_info.container.State.Status }}"
