@@ -31,7 +31,7 @@ services:
       ## Keep configs, scrapers, and plugins here.
       - /home/hugo/stash/config:/root/.stash
       ## Point this at your collection.
-      - /home/skogsparlan/emp:/data
+      - /home/skogsparlan/emp/sorted:/data
       - /home/skogsparlan/data/torrents/complete/emp:/data_2
       ## This is where your stash's metadata lives
       - /home/hugo/stash/metadata:/metadata
