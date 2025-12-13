@@ -26,11 +26,10 @@
       group: hugo
       backup: yes  
 
-  - name: Ensure docker-compose packages are installed
+  - name: Ensure docker-compose-plugin is installed (required for Portainer)
     ansible.builtin.apt:
       name:
         - docker-compose-plugin
-        - docker-compose-v2
         - docker-compose
       state: present
       update_cache: yes

@@ -1,6 +1,12 @@
 - hosts: all
   become: yes
   tasks:
+  - name: Remove docker-compose-v2 (conflicts with docker-compose-plugin)
+    ansible.builtin.apt:
+      name: docker-compose-v2
+      state: absent
+    ignore_errors: yes
+
   - name: Install docker-compose-plugin (for Portainer compatibility)
     ansible.builtin.apt:
       name: docker-compose-plugin
