@@ -34,7 +34,7 @@
     ansible.builtin.set_fact:
       docker_gid: "{{ docker_group.stdout.split(':')[2] }}"
 
-  - name: Start Portainer container with clean state
+  - name: Start Portainer container with clean state and explicit Docker socket
     community.docker.docker_container:
       name: portainer
       image: portainer/portainer-ce:latest
@@ -42,6 +42,7 @@
       restart_policy: unless-stopped
       groups:
         - "{{ docker_gid }}"
+      command: --host=unix:///var/run/docker.sock
       ports:
         - "9000:9000"
         - "8000:8000"
