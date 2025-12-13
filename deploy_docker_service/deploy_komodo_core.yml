@@ -1,0 +1,43 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Ensure Komodo directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: hugo
+        group: hugo
+        mode: 0775
+      loop:
+        - /home/hugo/komodo
+        - /home/hugo/komodo/db-data
+
+    - name: Clone ansible setup github repository (ensure latest Komodo compose)
+      ansible.builtin.git:
+        repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+        clone: yes
+        update: yes
+
+    - name: Ensure docker-compose-plugin is installed
+      ansible.builtin.apt:
+        name:
+          - docker-compose-plugin
+          - docker-compose
+        state: present
+        update_cache: yes
+
+    - name: Deploy Komodo Core stack
+      community.docker.docker_compose_v2:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/komodo/
+      register: komodo_output
+
+    - name: Wait for Komodo Core to be reachable
+      ansible.builtin.uri:
+        url: http://localhost:8080
+        status_code: 200
+        validate_certs: no
+      register: komodo_health
+      retries: 30
+      delay: 5
+      until: komodo_health.status == 200

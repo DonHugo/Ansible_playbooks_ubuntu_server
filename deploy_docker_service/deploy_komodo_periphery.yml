@@ -1,0 +1,38 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Ensure curl and python3 are installed
+      ansible.builtin.apt:
+        name:
+          - curl
+          - python3
+        state: present
+        update_cache: yes
+
+    - name: Download Komodo periphery setup script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/moghtech/komodo/main/scripts/setup-periphery.py
+        dest: /tmp/setup-periphery.py
+        mode: 0755
+
+    - name: Run Komodo periphery setup script
+      ansible.builtin.command: python3 /tmp/setup-periphery.py
+      args:
+        creates: /etc/systemd/system/komodo-periphery.service
+
+    - name: Ensure komodo-periphery service is enabled and started
+      ansible.builtin.systemd:
+        name: komodo-periphery
+        enabled: yes
+        state: started
+
+    - name: Wait for Komodo periphery on port 8120
+      ansible.builtin.uri:
+        url: http://localhost:8120/health
+        method: GET
+        status_code: 200
+        validate_certs: no
+      register: periphery_health
+      retries: 30
+      delay: 5
+      until: periphery_health.status == 200

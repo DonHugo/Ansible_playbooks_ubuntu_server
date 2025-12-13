@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  komodo-core:
+    image: ghcr.io/moghtech/komodo-core:latest
+    container_name: komodo-core
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      KOMODO_DB: ferretdb
+      KOMODO_DB_URL: postgres://komodo:komodo@komodo-db:5432/komodo?sslmode=disable
+    depends_on:
+      - komodo-db
+
+  komodo-db:
+    image: postgres:16
+    container_name: komodo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: komodo
+      POSTGRES_PASSWORD: komodo
+      POSTGRES_DB: komodo
+    volumes:
+      - /home/hugo/komodo/db-data:/var/lib/postgresql/data
