@@ -1,0 +1,111 @@
+- hosts: all
+  become: yes
+  vars:
+    portainer_url: "http://localhost:9000"
+    portainer_admin_password: "{{ lookup('env', 'PORTAINER_ADMIN_PASSWORD') | default('admin', true) }}"
+  tasks:
+  - name: Wait for Portainer API to be ready
+    ansible.builtin.uri:
+      url: "{{ portainer_url }}/api/status"
+      method: GET
+      status_code: 200
+    register: api_status
+    until: api_status.status == 200
+    retries: 10
+    delay: 3
+    changed_when: false
+
+  - name: Get Portainer API authentication token
+    ansible.builtin.uri:
+      url: "{{ portainer_url }}/api/auth"
+      method: POST
+      body_format: json
+      body:
+        username: "admin"
+        password: "{{ portainer_admin_password }}"
+      status_code: 200
+    register: auth_response
+    ignore_errors: yes
+
+  - name: Display authentication result
+    ansible.builtin.debug:
+      msg: "Auth successful: {{ auth_response.status == 200 }}"
+
+  - name: List all endpoints
+    ansible.builtin.uri:
+      url: "{{ portainer_url }}/api/endpoints"
+      method: GET
+      headers:
+        Authorization: "Bearer {{ auth_response.json.jwt }}"
+      status_code: 200
+    register: endpoints
+    when: auth_response.status == 200
+
+  - name: Display current endpoints
+    ansible.builtin.debug:
+      var: endpoints.json
+    when: auth_response.status == 200
+
+  - name: Find local Docker endpoint ID
+    ansible.builtin.set_fact:
+      local_endpoint_id: "{{ item.Id }}"
+      local_endpoint_status: "{{ item.Status }}"
+    loop: "{{ endpoints.json }}"
+    when: 
+      - auth_response.status == 200
+      - item.Name == "local" or item.Type == 1
+
+  - name: Display endpoint details
+    ansible.builtin.debug:
+      msg: "Endpoint ID: {{ local_endpoint_id | default('Not found') }}, Status: {{ local_endpoint_status | default('Unknown') }}"
+    when: local_endpoint_id is defined
+
+  - name: Update endpoint to use Docker socket
+    ansible.builtin.uri:
+      url: "{{ portainer_url }}/api/endpoints/{{ local_endpoint_id }}"
+      method: PUT
+      headers:
+        Authorization: "Bearer {{ auth_response.json.jwt }}"
+      body_format: json
+      body:
+        Name: "local"
+        URL: "unix:///var/run/docker.sock"
+        PublicURL: ""
+        GroupID: 1
+        TLSConfig:
+          TLS: false
+          TLSSkipVerify: false
+      status_code: 200
+    register: update_result
+    when: 
+      - auth_response.status == 200
+      - local_endpoint_id is defined
+    ignore_errors: yes
+
+  - name: Display update result
+    ansible.builtin.debug:
+      var: update_result
+    when: update_result is defined
+
+  - name: Get endpoint snapshot to refresh status
+    ansible.builtin.uri:
+      url: "{{ portainer_url }}/api/endpoints/{{ local_endpoint_id }}/docker/info"
+      method: GET
+      headers:
+        Authorization: "Bearer {{ auth_response.json.jwt }}"
+      status_code: 200
+    register: docker_info
+    when: 
+      - auth_response.status == 200
+      - local_endpoint_id is defined
+    ignore_errors: yes
+
+  - name: Display Docker connection status
+    ansible.builtin.debug:
+      msg: "Docker connection successful - Containers: {{ docker_info.json.Containers | default('Unable to connect') }}"
+    when: docker_info is defined
+
+  - name: Alternative - Check if we need to provide admin password
+    ansible.builtin.debug:
+      msg: "Authentication failed. If this is first setup, please provide PORTAINER_ADMIN_PASSWORD environment variable or reset Portainer."
+    when: auth_response.status != 200

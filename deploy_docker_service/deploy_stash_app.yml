@@ -26,21 +26,14 @@
       group: hugo
       backup: yes  
 
-  - name: Remove conflicting docker-compose-plugin if present
+  - name: Ensure docker-compose packages are installed
     ansible.builtin.apt:
-      name: docker-compose-plugin
-      state: absent
-    ignore_errors: yes
-
-  - name: apt install docker-compose-v2
-    ansible.builtin.apt:
-      name: docker-compose-v2
+      name:
+        - docker-compose-plugin
+        - docker-compose-v2
+        - docker-compose
       state: present
-
-  - name: apt install docker-compose
-    ansible.builtin.apt:
-      name: docker-compose
-      state: present
+      update_cache: yes
   - name: Clone ansible setup github repository
     git:
       repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git

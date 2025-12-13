@@ -1,0 +1,57 @@
+- hosts: all
+  become: yes
+  tasks:
+  - name: Install docker-compose-plugin (for Portainer compatibility)
+    ansible.builtin.apt:
+      name: docker-compose-plugin
+      state: present
+      update_cache: yes
+
+  - name: Verify docker-compose-plugin is installed
+    ansible.builtin.command:
+      cmd: dpkg -l docker-compose-plugin
+    register: plugin_status
+    changed_when: false
+
+  - name: Display docker-compose-plugin status
+    ansible.builtin.debug:
+      var: plugin_status.stdout_lines
+
+  - name: Verify docker compose command works
+    ansible.builtin.command:
+      cmd: docker compose version
+    register: compose_version
+    changed_when: false
+
+  - name: Display docker compose version
+    ansible.builtin.debug:
+      msg: "Docker Compose plugin version: {{ compose_version.stdout }}"
+
+  - name: Restart Portainer container to reconnect
+    community.docker.docker_container:
+      name: portainer
+      state: started
+      restart: yes
+
+  - name: Wait for Portainer to be ready
+    ansible.builtin.pause:
+      seconds: 10
+
+  - name: Get Portainer logs after restart
+    ansible.builtin.command:
+      cmd: docker logs portainer --tail 50
+    register: portainer_logs
+    changed_when: false
+
+  - name: Display Portainer logs
+    ansible.builtin.debug:
+      var: portainer_logs.stdout_lines
+
+  - name: Check Portainer container status
+    community.docker.docker_container_info:
+      name: portainer
+    register: portainer_info
+
+  - name: Display Portainer status
+    ansible.builtin.debug:
+      msg: "Portainer is {{ portainer_info.container.State.Status }}"
