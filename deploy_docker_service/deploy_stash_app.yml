@@ -11,6 +11,11 @@
       mode: 0775
     loop:
       - /home/hugo/stash
+      - /home/hugo/stash/config
+      - /home/hugo/stash/metadata
+      - /home/hugo/stash/cache
+      - /home/hugo/stash/blobs
+      - /home/hugo/stash/generated
 
   - name: Copy backupfiles for stash
     ansible.builtin.copy:
