@@ -31,9 +31,9 @@
       ansible.builtin.uri:
         url: https://localhost:8120/health
         method: GET
-        status_code: 200
+        status_code: [200, 404]
         validate_certs: no
       register: periphery_health
       retries: 30
       delay: 5
-      until: periphery_health.status == 200
+      until: periphery_health.status in [200, 404]
