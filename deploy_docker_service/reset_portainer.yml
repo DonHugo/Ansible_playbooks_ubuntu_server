@@ -1,0 +1,54 @@
+- hosts: all
+  become: yes
+  tasks:
+  - name: Stop Portainer container
+    community.docker.docker_container:
+      name: portainer
+      state: stopped
+
+  - name: Remove Portainer data directory (will reset configuration)
+    ansible.builtin.file:
+      path: /home/hugo/portainer
+      state: absent
+
+  - name: Recreate Portainer data directory with proper permissions
+    ansible.builtin.file:
+      path: /home/hugo/portainer
+      state: directory
+      owner: hugo
+      group: hugo
+      mode: 0755
+
+  - name: Remove Portainer container
+    community.docker.docker_container:
+      name: portainer
+      state: absent
+
+  - name: Clone ansible setup github repository
+    git:
+      repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+      dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+      clone: yes
+      update: yes
+
+  - name: Redeploy Portainer with fresh configuration
+    community.docker.docker_compose_v2:
+      project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/portainer/
+      state: present
+
+  - name: Wait for Portainer to initialize
+    ansible.builtin.pause:
+      seconds: 15
+
+  - name: Get Portainer container status
+    community.docker.docker_container_info:
+      name: portainer
+    register: portainer_status
+
+  - name: Display Portainer status
+    ansible.builtin.debug:
+      msg: "Portainer is {{ portainer_status.container.State.Status }} - Access at http://192.168.0.111:9000"
+
+  - name: Display important note
+    ansible.builtin.debug:
+      msg: "IMPORTANT: You will need to create a new admin account when you first access Portainer UI"
