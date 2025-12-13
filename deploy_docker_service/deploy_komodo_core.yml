@@ -11,6 +11,19 @@
       loop:
         - /home/hugo/komodo
         - /home/hugo/komodo/db-data
+        - /home/hugo/komodo/postgres-data
+        - /home/hugo/komodo/ferretdb-state
+
+    - name: Ensure Ferretdb and Postgres data dirs owned by UID 1000
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: 1000
+        group: 1000
+        mode: 0775
+      loop:
+        - /home/hugo/komodo/postgres-data
+        - /home/hugo/komodo/ferretdb-state
 
     - name: Clone ansible setup github repository (ensure latest Komodo compose)
       ansible.builtin.git:
