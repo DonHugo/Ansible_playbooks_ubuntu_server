@@ -19,15 +19,23 @@
       ansible.builtin.command: python3 /tmp/setup-periphery.py
       args:
         creates: /etc/systemd/system/periphery.service
- 
+
+    - name: Ensure periphery config has shared passkey
+      ansible.builtin.blockinfile:
+        path: /etc/komodo/periphery.config.toml
+        marker: "# ANSIBLE MANAGED PERIPHERY PASSKEY {mark}"
+        block: |
+          passkeys = ["Az8_d@v_GwzuCjM_THA_kzcn8TC.kQa.TJ3pbK7y"]
+
     - name: Ensure periphery service is enabled and started
       ansible.builtin.systemd:
         name: periphery
         enabled: yes
-        state: started
+        state: restarted
 
 
     - name: Wait for Komodo periphery on port 8120 (HTTPS)
+
       ansible.builtin.uri:
         url: https://localhost:8120/health
         method: GET

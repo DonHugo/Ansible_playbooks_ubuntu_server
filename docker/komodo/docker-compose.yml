@@ -37,6 +37,7 @@ services:
       KOMODO_LOCAL_AUTH: "true"
       KOMODO_INIT_ADMIN_USERNAME: admin
       KOMODO_INIT_ADMIN_PASSWORD: changeme
+      KOMODO_PASSKEY: Az8_d@v_GwzuCjM_THA_kzcn8TC.kQa.TJ3pbK7y
       KOMODO_DISABLE_USER_REGISTRATION: "false"
       KOMODO_ENABLE_NEW_USERS: "false"
       KOMODO_DISABLE_NON_ADMIN_CREATE: "false"
