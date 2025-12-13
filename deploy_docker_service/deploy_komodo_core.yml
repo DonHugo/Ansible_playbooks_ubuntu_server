@@ -32,6 +32,45 @@
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/komodo/
       register: komodo_output
 
+    - name: Show Komodo-related containers
+      ansible.builtin.command: docker ps -a --format "table {{'{{'}}.Names{{'}}'}}\t{{'{{'}}.Status{{'}}'}}\t{{'{{'}}.Ports{{'}}'}}"
+      register: komodo_docker_ps
+      changed_when: false
+
+    - name: Print Komodo container list
+      ansible.builtin.debug:
+        var: komodo_docker_ps.stdout_lines
+
+    - name: Show Komodo Core logs
+      ansible.builtin.command: docker logs komodo-core --tail=100
+      register: komodo_core_logs
+      failed_when: false
+      changed_when: false
+
+    - name: Print Komodo Core logs
+      ansible.builtin.debug:
+        var: komodo_core_logs.stdout_lines
+
+    - name: Show Komodo FerretDB logs
+      ansible.builtin.command: docker logs komodo-ferretdb --tail=50
+      register: komodo_ferretdb_logs
+      failed_when: false
+      changed_when: false
+
+    - name: Print Komodo FerretDB logs
+      ansible.builtin.debug:
+        var: komodo_ferretdb_logs.stdout_lines
+
+    - name: Show Komodo Postgres logs
+      ansible.builtin.command: docker logs komodo-postgres --tail=50
+      register: komodo_postgres_logs
+      failed_when: false
+      changed_when: false
+
+    - name: Print Komodo Postgres logs
+      ansible.builtin.debug:
+        var: komodo_postgres_logs.stdout_lines
+
     - name: Wait for Komodo Core to be reachable
       ansible.builtin.uri:
         url: http://localhost:8080
@@ -41,3 +80,4 @@
       retries: 30
       delay: 5
       until: komodo_health.status == 200
+
