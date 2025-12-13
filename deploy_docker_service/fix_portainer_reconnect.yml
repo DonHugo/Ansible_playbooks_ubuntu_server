@@ -1,0 +1,59 @@
+- hosts: all
+  become: yes
+  tasks:
+  - name: Stop Portainer container
+    community.docker.docker_container:
+      name: portainer
+      state: stopped
+
+  - name: Backup current Portainer database
+    ansible.builtin.copy:
+      src: /home/hugo/portainer/portainer.db
+      dest: /home/hugo/portainer/portainer.db.backup
+      remote_src: yes
+      owner: root
+      group: root
+      mode: '0600'
+
+  - name: Remove Portainer database to force endpoint reinitialization
+    ansible.builtin.file:
+      path: /home/hugo/portainer/portainer.db
+      state: absent
+
+  - name: Start Portainer container with fresh database
+    community.docker.docker_container:
+      name: portainer
+      state: started
+
+  - name: Wait for Portainer to initialize
+    ansible.builtin.pause:
+      seconds: 15
+
+  - name: Get Portainer logs
+    ansible.builtin.command:
+      cmd: docker logs portainer --tail 100
+    register: portainer_logs
+    changed_when: false
+
+  - name: Display Portainer logs
+    ansible.builtin.debug:
+      var: portainer_logs.stdout_lines
+
+  - name: Check Portainer is running
+    community.docker.docker_container_info:
+      name: portainer
+    register: portainer_info
+
+  - name: Display Portainer status
+    ansible.builtin.debug:
+      msg: "Portainer is {{ portainer_info.container.State.Status }}. Access it at http://192.168.0.111:9000 to create admin account."
+
+  - name: Display important notice
+    ansible.builtin.debug:
+      msg: |
+        IMPORTANT: Portainer database has been reset!
+        - Your admin account needs to be recreated
+        - All Portainer settings, users, and teams are lost
+        - Docker containers are NOT affected and still running
+        - Backup saved at: /home/hugo/portainer/portainer.db.backup
+        - Open http://192.168.0.111:9000 now to set up admin account
