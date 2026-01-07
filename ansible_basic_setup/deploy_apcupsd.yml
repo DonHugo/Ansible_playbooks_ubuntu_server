@@ -22,6 +22,12 @@
           UPSCABLE usb
           UPSTYPE usb
           DEVICE
+          # Shutdown when battery below 5%
+          BATTERYLEVEL 5
+          # Or less than 3 minutes runtime
+          MINUTES 3
+          # Delay before reacting to power loss
+          ONBATTERYDELAY 6
       notify: restart apcupsd
 
     - name: Enable and start apcupsd service
@@ -29,6 +35,12 @@
         name: apcupsd
         enabled: yes
         state: started
+
+    - name: Validate UPS is detected
+      ansible.builtin.command: apcaccess status
+      register: apcaccess_output
+      changed_when: false
+      failed_when: apcaccess_output.rc != 0 or 'STATUS' not in apcaccess_output.stdout
 
   handlers:
     - name: restart apcupsd
