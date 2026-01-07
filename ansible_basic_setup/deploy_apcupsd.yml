@@ -1,0 +1,37 @@
+- hosts: all
+  become: yes
+  gather_facts: true
+
+  vars:
+    apcupsd_config_file: /etc/apcupsd/apcupsd.conf
+
+  tasks:
+    - name: Ensure apcupsd package is installed
+      ansible.builtin.apt:
+        name: apcupsd
+        state: present
+        update_cache: yes
+
+    - name: Configure apcupsd.conf for USB UPS
+      ansible.builtin.blockinfile:
+        path: "{{ apcupsd_config_file }}"
+        marker: "# {mark} ANSIBLE MANAGED APCUPSD CONFIG"
+        insertafter: EOF
+        block: |
+          UPSNAME smartups750
+          UPSCABLE usb
+          UPSTYPE usb
+          DEVICE
+      notify: restart apcupsd
+
+    - name: Enable and start apcupsd service
+      ansible.builtin.service:
+        name: apcupsd
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: restart apcupsd
+      ansible.builtin.service:
+        name: apcupsd
+        state: restarted
