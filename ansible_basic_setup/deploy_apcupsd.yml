@@ -28,6 +28,10 @@
           MINUTES 3
           # Delay before reacting to power loss
           ONBATTERYDELAY 6
+          # Expose NIS network server for remote monitoring
+          NETSERVER on
+          NISIP 0.0.0.0
+          NISPORT 3551
       notify: restart apcupsd
 
     - name: Enable and start apcupsd service
