@@ -1,0 +1,26 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Ensure transmission config directory exists
+      ansible.builtin.file:
+        path: /home/hugo/transmission/config
+        state: directory
+        owner: hugo
+        group: hugo
+        mode: "0775"
+
+    - name: Clone Ansible playbooks repository
+      ansible.builtin.git:
+        repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+        version: main
+        clone: yes
+        update: yes
+
+- hosts: all
+  become: yes
+  tasks:
+    - name: Deploy Transmission via Docker Compose
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/transmission/
+      register: transmission_compose_result
