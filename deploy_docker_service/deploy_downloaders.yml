@@ -11,6 +11,7 @@
     loop:
       - /home/hugo/nzbget
       - /home/hugo/qbittorrent/appdata/qBittorrent
+      - /home/hugo/transmission/config
 
   - name: Copy backupfiles for nzbget
     ansible.builtin.copy:
@@ -60,4 +61,8 @@
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/qbittorrent/
       register: output
 
+    - name: Create and start transmission
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/transmission/
+      register: output
 

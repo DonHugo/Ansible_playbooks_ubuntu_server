@@ -1,0 +1,19 @@
+version: "3.2"
+services:
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Stockholm
+    volumes:
+      - /home/hugo/transmission/config:/config
+      - /home/skogsparlan/data/torrents:/downloads
+      - /home/skogsparlan/data/torrents/watch:/watch
+      - /mnt/user/emp:/emp
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    restart: unless-stopped
