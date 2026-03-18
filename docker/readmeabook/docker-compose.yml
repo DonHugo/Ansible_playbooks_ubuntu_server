@@ -1,0 +1,22 @@
+version: "3.2"
+services:
+  readmeabook:
+    container_name: readmeabook
+    image: ghcr.io/kikootwo/readmeabook:latest
+    restart: unless-stopped
+    ports:
+      - 3030:3030
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Stockholm
+      # Set PUBLIC_URL if using Plex OAuth login (e.g. https://readmeabook.yourdomain.com)
+      # - PUBLIC_URL=http://192.168.0.111:3030
+    volumes:
+      - /home/hugo/readmeabook/config:/config
+      - /home/hugo/readmeabook/pgdata:/pgdata
+      - /home/hugo/readmeabook/redis:/redis
+      - /home/hugo/readmeabook/cache:/cache
+      - /home/skogsparlan/data/torrents/:/downloads
+      - /home/skogsparlan/data/usenet/complete/:/destination
+      - /home/skogsparlan/data/media/books/:/books
