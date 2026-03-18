@@ -15,14 +15,9 @@
       - /home/hugo/readmeabook/redis
       - /home/hugo/readmeabook/cache
 
-  - name: apt install docker-compose-v2
+  - name: apt install docker-compose-plugin
     ansible.builtin.apt:
-      name: docker-compose-v2
-      state: present
-
-  - name: apt install docker-compose
-    ansible.builtin.apt:
-      name: docker-compose
+      name: docker-compose-plugin
       state: present
 
   - name: Clone ansible setup github repository
