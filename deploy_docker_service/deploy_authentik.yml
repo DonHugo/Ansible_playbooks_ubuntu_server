@@ -1,0 +1,47 @@
+- hosts: ubuntu_main
+  become: yes
+  tasks:
+  - name: Create authentik config directories if they don't exist
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: hugo
+      group: hugo
+      mode: 0775
+    loop:
+      - /home/hugo/authentik
+      - /home/hugo/authentik/pgdata
+      - /home/hugo/authentik/redis
+      - /home/hugo/authentik/media
+      - /home/hugo/authentik/certs
+      - /home/hugo/authentik/custom-templates
+
+  - name: apt install docker-compose-plugin
+    ansible.builtin.apt:
+      name: docker-compose-plugin
+      state: present
+
+  - name: Clone ansible setup github repository
+    git:
+      repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+      dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+      clone: yes
+      update: yes
+
+  - name: Copy .env file to authentik docker directory
+    ansible.builtin.copy:
+      src: /home/hugo/authentik/.env
+      dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/authentik/.env
+      owner: hugo
+      group: hugo
+      mode: 0600
+      remote_src: yes
+
+# Deploy docker image
+- hosts: ubuntu_main
+  become: yes
+  tasks:
+    - name: Create and start authentik service
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/authentik/
+      register: output
