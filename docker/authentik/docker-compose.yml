@@ -49,8 +49,8 @@ services:
       - /home/hugo/authentik/media:/media
       - /home/hugo/authentik/custom-templates:/templates
     ports:
-      - 9000:9000
-      - 9443:9443
+      - 9001:9000
+      - 9444:9443
     depends_on:
       postgresql:
         condition: service_healthy
