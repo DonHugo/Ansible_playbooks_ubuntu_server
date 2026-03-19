@@ -10,8 +10,8 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Stockholm
-      # Set PUBLIC_URL if using Plex OAuth login (e.g. https://readmeabook.yourdomain.com)
-      # - PUBLIC_URL=http://192.168.0.111:3030
+      # Required for OAuth/OIDC callback
+      - PUBLIC_URL=https://readmeabook.tells.se
     volumes:
       - /home/hugo/readmeabook/config:/config
       - /home/hugo/readmeabook/pgdata:/pgdata
