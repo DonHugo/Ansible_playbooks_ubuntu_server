@@ -1,7 +1,7 @@
 - hosts: all
   become: yes
   tasks:
-  - name: Create readmeabook config directories if they don't exist
+  - name: Create readmeabook data directories
     ansible.builtin.file:
       path: "{{ item }}"
       state: directory
@@ -11,9 +11,16 @@
     loop:
       - /home/hugo/readmeabook
       - /home/hugo/readmeabook/config
-      - /home/hugo/readmeabook/pgdata
       - /home/hugo/readmeabook/redis
       - /home/hugo/readmeabook/cache
+
+  # pgdata must be owned by UID 102 (postgres user inside container).
+  # Create with open permissions so Docker/entrypoint can take ownership.
+  - name: Create pgdata directory (postgres takes ownership on first start)
+    ansible.builtin.file:
+      path: /home/hugo/readmeabook/pgdata
+      state: directory
+      mode: 0755
 
   - name: apt install docker-compose-plugin
     ansible.builtin.apt:
@@ -27,50 +34,19 @@
       clone: yes
       update: yes
 
-  # Migration: copy existing postgres data out of the container before recreating it.
-  # Only needed once — skipped if pgdata is already populated on the host.
-  - name: Check if pgdata already populated on host
-    ansible.builtin.find:
-      paths: /home/hugo/readmeabook/pgdata
-      file_type: any
-    register: pgdata_contents
-
-  - name: Stop readmeabook container temporarily for data migration
+  # Remove any pre-existing stopped/created container so compose can start fresh
+  - name: Remove stale readmeabook container if present
     community.docker.docker_container:
       name: readmeabook
-      state: stopped
-    when: pgdata_contents.matched == 0
+      state: absent
+      force_kill: yes
 
-  - name: Copy PostgreSQL data from container to host volume
-    ansible.builtin.shell: |
-      docker cp readmeabook:/var/lib/postgresql/data/. /home/hugo/readmeabook/pgdata/ && \
-      chown -R 1000:1000 /home/hugo/readmeabook/pgdata/
-    when: pgdata_contents.matched == 0
-    register: pg_copy
-    failed_when: pg_copy.rc != 0 and 'No such container' not in pg_copy.stderr
+  - name: Deploy readmeabook via docker compose
+    community.docker.docker_compose:
+      project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/readmeabook/
+      recreate: always
+    register: output
 
-  - name: Copy Redis data from container to host volume
-    ansible.builtin.shell: |
-      docker cp readmeabook:/var/lib/redis/. /home/hugo/readmeabook/redis/ && \
-      chown -R 1000:1000 /home/hugo/readmeabook/redis/
-    when: pgdata_contents.matched == 0
-    register: redis_copy
-    failed_when: redis_copy.rc != 0 and 'No such container' not in redis_copy.stderr
-
-  - name: Copy app config/secrets from container to host volume
-    ansible.builtin.shell: |
-      docker cp readmeabook:/app/config/. /home/hugo/readmeabook/config/ && \
-      chown -R 1000:1000 /home/hugo/readmeabook/config/
-    when: pgdata_contents.matched == 0
-    register: config_copy
-    failed_when: config_copy.rc != 0 and 'No such container' not in config_copy.stderr
-
-# Deploy docker image with corrected volume mounts
-- hosts: all
-  become: yes
-  tasks:
-    - name: Create and start readmeabook service
-      community.docker.docker_compose:
-        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/readmeabook/
-        recreate: always
-      register: output
+  - name: Show compose output
+    ansible.builtin.debug:
+      var: output
