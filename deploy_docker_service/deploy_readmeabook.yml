@@ -2,7 +2,7 @@
   become: yes
   tasks:
   - name: Create readmeabook config directories if they don't exist
-    file:
+    ansible.builtin.file:
       path: "{{ item }}"
       state: directory
       owner: hugo
@@ -21,17 +21,56 @@
       state: present
 
   - name: Clone ansible setup github repository
-    git:
-        repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
-        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
-        clone: yes
-        update: yes
+    ansible.builtin.git:
+      repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+      dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+      clone: yes
+      update: yes
 
-# Deploy docker image
+  # Migration: copy existing postgres data out of the container before recreating it.
+  # Only needed once — skipped if pgdata is already populated on the host.
+  - name: Check if pgdata already populated on host
+    ansible.builtin.find:
+      paths: /home/hugo/readmeabook/pgdata
+      file_type: any
+    register: pgdata_contents
+
+  - name: Stop readmeabook container temporarily for data migration
+    community.docker.docker_container:
+      name: readmeabook
+      state: stopped
+    when: pgdata_contents.matched == 0
+
+  - name: Copy PostgreSQL data from container to host volume
+    ansible.builtin.shell: |
+      docker cp readmeabook:/var/lib/postgresql/data/. /home/hugo/readmeabook/pgdata/ && \
+      chown -R 1000:1000 /home/hugo/readmeabook/pgdata/
+    when: pgdata_contents.matched == 0
+    register: pg_copy
+    failed_when: pg_copy.rc != 0 and 'No such container' not in pg_copy.stderr
+
+  - name: Copy Redis data from container to host volume
+    ansible.builtin.shell: |
+      docker cp readmeabook:/var/lib/redis/. /home/hugo/readmeabook/redis/ && \
+      chown -R 1000:1000 /home/hugo/readmeabook/redis/
+    when: pgdata_contents.matched == 0
+    register: redis_copy
+    failed_when: redis_copy.rc != 0 and 'No such container' not in redis_copy.stderr
+
+  - name: Copy app config/secrets from container to host volume
+    ansible.builtin.shell: |
+      docker cp readmeabook:/app/config/. /home/hugo/readmeabook/config/ && \
+      chown -R 1000:1000 /home/hugo/readmeabook/config/
+    when: pgdata_contents.matched == 0
+    register: config_copy
+    failed_when: config_copy.rc != 0 and 'No such container' not in config_copy.stderr
+
+# Deploy docker image with corrected volume mounts
 - hosts: all
   become: yes
   tasks:
     - name: Create and start readmeabook service
       community.docker.docker_compose:
         project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/readmeabook/
+        recreate: always
       register: output

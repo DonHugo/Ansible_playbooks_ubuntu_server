@@ -13,9 +13,9 @@ services:
       # Required for OAuth/OIDC callback
       - PUBLIC_URL=https://readmeabook.tells.se
     volumes:
-      - /home/hugo/readmeabook/config:/config
-      - /home/hugo/readmeabook/pgdata:/pgdata
-      - /home/hugo/readmeabook/redis:/redis
+      - /home/hugo/readmeabook/config:/app/config          # JWT secrets, encryption keys
+      - /home/hugo/readmeabook/pgdata:/var/lib/postgresql/data  # PostgreSQL database
+      - /home/hugo/readmeabook/redis:/var/lib/redis         # Redis persistence
       - /home/hugo/readmeabook/cache:/cache
       - /home/skogsparlan/data/torrents/:/downloads
       - /home/skogsparlan/data/usenet/complete/:/destination
