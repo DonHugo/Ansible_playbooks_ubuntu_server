@@ -131,6 +131,8 @@ services:
       PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
       PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
       PAPERLESS_URL: ${PAPERLESS_URL:-http://localhost:8010}
+      # Include paperless-ngx alias so internal container-to-container calls are accepted
+      PAPERLESS_ALLOWED_HOSTS: ${PAPERLESS_ALLOWED_HOSTS:-paperless-ngx,192.168.0.111,localhost,127.0.0.1}
       PAPERLESS_TIME_ZONE: ${TZ:-Europe/Stockholm}
       PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-eng}
       PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-admin}
@@ -139,7 +141,9 @@ services:
       USERMAP_UID: 1000
       USERMAP_GID: 1000
     networks:
-      - paperless_net
+      paperless_net:
+        aliases:
+          - paperless-ngx
 
   # ----------------------------------------------------------
   # Paperless-AI — AI-powered auto-tagging and RAG chat
@@ -163,7 +167,7 @@ services:
       PGID: 1000
       PAPERLESS_AI_PORT: 3000
       PAPERLESS_AI_INITIAL_SETUP: ${PAPERLESS_AI_INITIAL_SETUP:-yes}
-      PAPERLESS_API_URL: http://paperless_ngx:8000/api
+      PAPERLESS_API_URL: http://paperless-ngx:8000/api
       PAPERLESS_API_TOKEN: ${PAPERLESS_API_TOKEN}
       PAPERLESS_USERNAME: ${PAPERLESS_ADMIN_USER:-admin}
       AI_PROVIDER: ${AI_PROVIDER:-openai}
