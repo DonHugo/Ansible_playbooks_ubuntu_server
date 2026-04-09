@@ -169,7 +169,7 @@ services:
       PAPERLESS_AI_INITIAL_SETUP: ${PAPERLESS_AI_INITIAL_SETUP:-yes}
       PAPERLESS_API_URL: http://paperless-ngx:8000/api
       PAPERLESS_API_TOKEN: ${PAPERLESS_API_TOKEN}
-      PAPERLESS_USERNAME: ${PAPERLESS_ADMIN_USER:-admin}
+      PAPERLESS_USERNAME: ${PAPERLESS_USERNAME:-admin}
       AI_PROVIDER: ${AI_PROVIDER:-openai}
       # --- Ollama settings (local AI, optional) ---
       OLLAMA_API_URL: ${OLLAMA_API_URL:-http://localhost:11434}
