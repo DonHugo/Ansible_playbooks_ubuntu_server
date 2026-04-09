@@ -111,7 +111,7 @@ services:
       - "8010:8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000"]
-      start_period: 60s
+      start_period: 120s
       interval: 30s
       retries: 5
       timeout: 10s
@@ -132,7 +132,7 @@ services:
       PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
       PAPERLESS_URL: ${PAPERLESS_URL:-http://localhost:8010}
       PAPERLESS_TIME_ZONE: ${TZ:-Europe/Stockholm}
-      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-eng+swe}
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-eng}
       PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-admin}
       PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
       PAPERLESS_ADMIN_MAIL: ${PAPERLESS_ADMIN_MAIL:-admin@localhost}
