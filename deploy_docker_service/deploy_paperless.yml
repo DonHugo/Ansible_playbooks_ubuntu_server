@@ -76,15 +76,29 @@
     # 5. Pull latest images before starting
     # ----------------------------------------------------------
     - name: Pull latest paperless stack images
-      community.docker.docker_compose:
-        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/paperless/
-        pull: yes
-        state: present
-      register: output
+      ansible.builtin.command:
+        cmd: docker compose pull
+        chdir: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/paperless/
+      register: pull_output
+      changed_when: true
 
-    - name: Display compose output
+    - name: Display pull output
       ansible.builtin.debug:
-        var: output
+        var: pull_output.stdout_lines
+
+    # ----------------------------------------------------------
+    # 5b. Start the paperless stack
+    # ----------------------------------------------------------
+    - name: Start paperless stack with docker compose
+      ansible.builtin.command:
+        cmd: docker compose up -d --remove-orphans
+        chdir: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/paperless/
+      register: up_output
+      changed_when: true
+
+    - name: Display compose up output
+      ansible.builtin.debug:
+        var: up_output.stderr_lines
 
     # ----------------------------------------------------------
     # 6. Wait for paperless-ngx to be ready
