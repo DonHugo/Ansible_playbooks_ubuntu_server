@@ -1,0 +1,199 @@
+version: "3.4"
+
+# ============================================================
+# Paperless-NGX full stack
+#   - paperless-ngx  : document management (host port 8010)
+#   - paperless-ai   : AI auto-tagging / RAG chat (host port 3000)
+#   - apache tika    : advanced OCR / document parsing (internal only)
+#   - gotenberg      : PDF conversion service (internal only)
+#   - postgres       : paperless-ngx database
+#   - redis          : paperless-ngx broker / cache
+#
+# Port notes:
+#   8000 taken by Portainer → mapped to 8010 on host
+#   3030 taken by readmeabook → Gotenberg is internal-only, no host mapping needed
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # PostgreSQL — paperless-ngx database
+  # ----------------------------------------------------------
+  paperless_db:
+    container_name: paperless_db
+    image: docker.io/library/postgres:16-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - /home/hugo/paperless/pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${PAPERLESS_DB_NAME:-paperless}
+      POSTGRES_USER: ${PAPERLESS_DB_USER:-paperless}
+      POSTGRES_PASSWORD: ${PAPERLESS_DB_PASS}
+    networks:
+      - paperless_net
+
+  # ----------------------------------------------------------
+  # Redis — broker / result-backend for paperless-ngx workers
+  # ----------------------------------------------------------
+  paperless_redis:
+    container_name: paperless_redis
+    image: docker.io/library/redis:7-alpine
+    restart: unless-stopped
+    command: --save 60 1 --loglevel warning
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 10s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    volumes:
+      - /home/hugo/paperless/redis:/data
+    networks:
+      - paperless_net
+
+  # ----------------------------------------------------------
+  # Apache Tika — advanced document parsing / OCR helper
+  # ----------------------------------------------------------
+  tika:
+    container_name: paperless_tika
+    image: ghcr.io/paperless-ngx/tika:latest
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:9998/tika || exit 1"]
+      start_period: 30s
+      interval: 30s
+      retries: 3
+      timeout: 10s
+    networks:
+      - paperless_net
+
+  # ----------------------------------------------------------
+  # Gotenberg — PDF / HTML / Office document conversion
+  # ----------------------------------------------------------
+  gotenberg:
+    container_name: paperless_gotenberg
+    image: gotenberg/gotenberg:latest
+    restart: unless-stopped
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3000/health || exit 1"]
+      start_period: 20s
+      interval: 30s
+      retries: 3
+      timeout: 10s
+    networks:
+      - paperless_net
+
+  # ----------------------------------------------------------
+  # Paperless-NGX — core document management UI
+  # ----------------------------------------------------------
+  paperless_ngx:
+    container_name: paperless_ngx
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    depends_on:
+      paperless_db:
+        condition: service_healthy
+      paperless_redis:
+        condition: service_healthy
+      tika:
+        condition: service_healthy
+      gotenberg:
+        condition: service_healthy
+    ports:
+      - "8010:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      start_period: 60s
+      interval: 30s
+      retries: 5
+      timeout: 10s
+    volumes:
+      - /home/hugo/paperless/data:/usr/src/paperless/data
+      - /home/hugo/paperless/media:/usr/src/paperless/media
+      - /home/hugo/paperless/export:/usr/src/paperless/export
+      - /home/hugo/paperless/consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://paperless_redis:6379
+      PAPERLESS_DBHOST: paperless_db
+      PAPERLESS_DBNAME: ${PAPERLESS_DB_NAME:-paperless}
+      PAPERLESS_DBUSER: ${PAPERLESS_DB_USER:-paperless}
+      PAPERLESS_DBPASS: ${PAPERLESS_DB_PASS}
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+      PAPERLESS_URL: ${PAPERLESS_URL:-http://localhost:8010}
+      PAPERLESS_TIME_ZONE: ${TZ:-Europe/Stockholm}
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-eng+swe}
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-admin}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
+      PAPERLESS_ADMIN_MAIL: ${PAPERLESS_ADMIN_MAIL:-admin@localhost}
+      USERMAP_UID: 1000
+      USERMAP_GID: 1000
+    networks:
+      - paperless_net
+
+  # ----------------------------------------------------------
+  # Paperless-AI — AI-powered auto-tagging and RAG chat
+  # ----------------------------------------------------------
+  paperless_ai:
+    container_name: paperless_ai
+    image: clusterzx/paperless-ai:latest
+    restart: unless-stopped
+    depends_on:
+      paperless_ngx:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges=true
+    environment:
+      PUID: 1000
+      PGID: 1000
+      PAPERLESS_AI_PORT: 3000
+      PAPERLESS_AI_INITIAL_SETUP: ${PAPERLESS_AI_INITIAL_SETUP:-yes}
+      PAPERLESS_API_URL: http://paperless_ngx:8000/api
+      PAPERLESS_API_TOKEN: ${PAPERLESS_API_TOKEN}
+      PAPERLESS_USERNAME: ${PAPERLESS_ADMIN_USER:-admin}
+      AI_PROVIDER: ${AI_PROVIDER:-openai}
+      # --- Ollama settings (local AI, optional) ---
+      OLLAMA_API_URL: ${OLLAMA_API_URL:-http://localhost:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
+      # --- OpenAI settings (cloud AI, primary) ---
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      # --- Custom / DeepSeek / OpenRouter (optional) ---
+      CUSTOM_BASE_URL: ${CUSTOM_BASE_URL:-}
+      CUSTOM_API_KEY: ${CUSTOM_API_KEY:-}
+      CUSTOM_MODEL: ${CUSTOM_MODEL:-}
+      # --- Processing settings ---
+      SCAN_INTERVAL: ${SCAN_INTERVAL:-*/30 * * * *}
+      PROCESS_PREDEFINED_DOCUMENTS: ${PROCESS_PREDEFINED_DOCUMENTS:-yes}
+      TAGS: ${PAPERLESS_AI_TAGS:-pre-process}
+      ADD_AI_PROCESSED_TAG: ${ADD_AI_PROCESSED_TAG:-yes}
+      AI_PROCESSED_TAG_NAME: ${AI_PROCESSED_TAG_NAME:-ai-processed}
+      USE_EXISTING_DATA: ${USE_EXISTING_DATA:-no}
+      # --- RAG service (runs inside the same container) ---
+      RAG_SERVICE_URL: http://localhost:8000
+      RAG_SERVICE_ENABLED: ${RAG_SERVICE_ENABLED:-true}
+    volumes:
+      - /home/hugo/paperless/paperless-ai-data:/app/data
+    networks:
+      - paperless_net
+
+networks:
+  paperless_net:
+    driver: bridge
+    name: paperless_net

@@ -1,0 +1,59 @@
+---
+# ============================================================
+# Tear down Paperless stack on ubuntu-1 (ubuntu_main)
+#
+# This playbook stops and removes all paperless containers.
+# Data directories (/home/hugo/paperless/*) are preserved.
+# To also wipe all data, set wipe_data=true:
+#   ansible-playbook -i inventory/semaphore_inventory.yml \
+#     tear_down_service/tear_down_paperless.yml -e wipe_data=true
+# ============================================================
+
+- hosts: ubuntu_main
+  become: yes
+
+  vars:
+    wipe_data: false
+
+  tasks:
+
+    - name: Stop and remove paperless stack via docker compose
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/paperless/
+        state: absent
+        remove_volumes: false
+      ignore_errors: yes
+
+    # Explicit removal in case compose file is missing/changed
+    - name: Remove individual containers (fallback)
+      community.docker.docker_container:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - paperless_ai
+        - paperless_ngx
+        - paperless_gotenberg
+        - paperless_tika
+        - paperless_redis
+        - paperless_db
+      ignore_errors: yes
+
+    - name: Remove paperless internal network (fallback)
+      community.docker.docker_network:
+        name: paperless_net
+        state: absent
+      ignore_errors: yes
+
+    - name: "[OPTIONAL] Wipe all paperless data directories"
+      ansible.builtin.file:
+        path: /home/hugo/paperless
+        state: absent
+      when: wipe_data | bool
+
+    - name: Display teardown result
+      ansible.builtin.debug:
+        msg: |
+          ============================================================
+          Paperless stack removed.
+          Data directories: {{ 'WIPED' if wipe_data | bool else 'PRESERVED at /home/hugo/paperless/' }}
+          ============================================================

@@ -1,0 +1,137 @@
+---
+# ============================================================
+# Backup Paperless stack data on ubuntu-1 (ubuntu_main)
+#
+# What is backed up:
+#   - PostgreSQL database dump (pg_dump → compressed SQL)
+#   - media/       — processed documents (actual files)
+#   - data/        — search index, thumbnails, classifiers
+#   - export/      — any manual exports
+#   - paperless-ai-data/ — AI config and RAG index
+#   - .env         — stack secrets (mode 0600)
+#
+# Backup destination: /home/skogsparlan/backup/app_backup/paperless/
+# Timestamped sub-directory created on each run.
+#
+# Strategy:
+#   1. Pause paperless-ai (no writes) — NGX stays up for DB dump
+#   2. pg_dump via docker exec (consistent snapshot)
+#   3. rsync / copy data directories
+#   4. Restart paperless-ai
+# ============================================================
+
+- hosts: ubuntu_main
+  become: yes
+
+  vars:
+    backup_root: /home/skogsparlan/backup/app_backup/paperless
+    data_root: /home/hugo/paperless
+    compose_dir: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/paperless
+    timestamp: "{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}{{ ansible_date_time.minute }}"
+
+  tasks:
+
+    # ----------------------------------------------------------
+    # 1. Create timestamped backup directory
+    # ----------------------------------------------------------
+    - name: Create timestamped backup directory
+      ansible.builtin.file:
+        path: "{{ backup_root }}/{{ timestamp }}"
+        state: directory
+        owner: hugo
+        group: hugo
+        mode: 0775
+
+    # ----------------------------------------------------------
+    # 2. Stop paperless-ai to avoid writes during backup
+    #    (paperless-ngx and DB stay running for pg_dump)
+    # ----------------------------------------------------------
+    - name: Stop paperless-ai container
+      community.docker.docker_container:
+        name: paperless_ai
+        state: stopped
+
+    # ----------------------------------------------------------
+    # 3. PostgreSQL dump (compressed)
+    # ----------------------------------------------------------
+    - name: Dump PostgreSQL database
+      ansible.builtin.command: >
+        docker exec paperless_db
+        pg_dump -U paperless -d paperless -F c -f /tmp/paperless_db.dump
+      register: pg_dump_out
+      failed_when: pg_dump_out.rc != 0
+
+    - name: Copy DB dump out of container to backup dir
+      ansible.builtin.command: >
+        docker cp paperless_db:/tmp/paperless_db.dump
+        {{ backup_root }}/{{ timestamp }}/paperless_db.dump
+      register: pg_cp_out
+      failed_when: pg_cp_out.rc != 0
+
+    - name: Remove dump file from container
+      ansible.builtin.command: docker exec paperless_db rm /tmp/paperless_db.dump
+      ignore_errors: yes
+
+    # ----------------------------------------------------------
+    # 4. Copy data directories
+    # ----------------------------------------------------------
+    - name: Copy media directory (processed documents)
+      ansible.builtin.copy:
+        src: "{{ data_root }}/media/"
+        dest: "{{ backup_root }}/{{ timestamp }}/media/"
+        remote_src: yes
+
+    - name: Copy data directory (index, thumbnails)
+      ansible.builtin.copy:
+        src: "{{ data_root }}/data/"
+        dest: "{{ backup_root }}/{{ timestamp }}/data/"
+        remote_src: yes
+
+    - name: Copy export directory
+      ansible.builtin.copy:
+        src: "{{ data_root }}/export/"
+        dest: "{{ backup_root }}/{{ timestamp }}/export/"
+        remote_src: yes
+
+    - name: Copy paperless-ai data directory
+      ansible.builtin.copy:
+        src: "{{ data_root }}/paperless-ai-data/"
+        dest: "{{ backup_root }}/{{ timestamp }}/paperless-ai-data/"
+        remote_src: yes
+
+    # ----------------------------------------------------------
+    # 5. Back up .env (secrets — mode 0600)
+    # ----------------------------------------------------------
+    - name: Copy .env to backup directory
+      ansible.builtin.copy:
+        src: "{{ data_root }}/.env"
+        dest: "{{ backup_root }}/{{ timestamp }}/.env"
+        remote_src: yes
+        owner: hugo
+        group: hugo
+        mode: 0600
+
+    # ----------------------------------------------------------
+    # 6. Restart paperless-ai
+    # ----------------------------------------------------------
+    - name: Restart paperless-ai container
+      community.docker.docker_container:
+        name: paperless_ai
+        state: started
+
+    # ----------------------------------------------------------
+    # 7. Report
+    # ----------------------------------------------------------
+    - name: List backup contents
+      ansible.builtin.command: ls -lh {{ backup_root }}/{{ timestamp }}/
+      register: backup_listing
+
+    - name: Display backup summary
+      ansible.builtin.debug:
+        msg: |
+          ============================================================
+          Paperless backup complete!
+          Location : {{ backup_root }}/{{ timestamp }}/
+          Contents :
+          {{ backup_listing.stdout }}
+          ============================================================

@@ -1,0 +1,128 @@
+---
+# ============================================================
+# Deploy Paperless-NGX full stack on ubuntu-1 (ubuntu_main)
+#
+# Stack:
+  #   - paperless-ngx  (port 8010) — document management
+#   - paperless-ai   (port 3000) — AI auto-tagging / RAG chat
+#   - apache tika              — document parsing / OCR
+#   - gotenberg                — PDF / office conversion
+#   - postgres + redis         — database + broker
+#
+# Prerequisites on the server (done once, outside this playbook):
+#   1. Copy .env.example → /home/hugo/paperless/.env and fill secrets
+#   2. After first start, create an API token in paperless-ngx admin,
+#      then update PAPERLESS_API_TOKEN in .env and restart paperless_ai.
+# ============================================================
+
+- hosts: ubuntu_main
+  become: yes
+
+  tasks:
+
+    # ----------------------------------------------------------
+    # 1. Directory structure
+    # ----------------------------------------------------------
+    - name: Create paperless data directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: hugo
+        group: hugo
+        mode: 0775
+      loop:
+        - /home/hugo/paperless
+        - /home/hugo/paperless/pgdata
+        - /home/hugo/paperless/redis
+        - /home/hugo/paperless/data
+        - /home/hugo/paperless/media
+        - /home/hugo/paperless/export
+        - /home/hugo/paperless/consume
+        - /home/hugo/paperless/paperless-ai-data
+
+    # ----------------------------------------------------------
+    # 2. Ensure docker-compose plugin is installed
+    # ----------------------------------------------------------
+    - name: Install docker-compose-plugin
+      ansible.builtin.apt:
+        name: docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    # ----------------------------------------------------------
+    # 3. Clone / update repository (compose file lives here)
+    # ----------------------------------------------------------
+    - name: Clone ansible setup github repository
+      ansible.builtin.git:
+        repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+        clone: yes
+        update: yes
+
+    # ----------------------------------------------------------
+    # 4. Copy .env from secrets location to compose directory
+    #    The .env must already exist at /home/hugo/paperless/.env
+    # ----------------------------------------------------------
+    - name: Copy paperless .env to compose directory
+      ansible.builtin.copy:
+        src: /home/hugo/paperless/.env
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/paperless/.env
+        owner: hugo
+        group: hugo
+        mode: 0600
+        remote_src: yes
+
+    # ----------------------------------------------------------
+    # 5. Pull latest images before starting
+    # ----------------------------------------------------------
+    - name: Pull latest paperless stack images
+      community.docker.docker_compose:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/paperless/
+        pull: yes
+        state: present
+      register: output
+
+    - name: Display compose output
+      ansible.builtin.debug:
+        var: output
+
+    # ----------------------------------------------------------
+    # 6. Wait for paperless-ngx to be ready
+    # ----------------------------------------------------------
+    - name: Wait for paperless-ngx web UI to respond
+      ansible.builtin.uri:
+        url: http://localhost:8010
+        status_code: 200
+        follow_redirects: yes
+      register: paperless_health
+      retries: 20
+      delay: 15
+      until: paperless_health.status == 200
+
+    # ----------------------------------------------------------
+    # 7. Post-deploy instructions
+    # ----------------------------------------------------------
+    - name: Display post-deploy instructions
+      ansible.builtin.debug:
+        msg: |
+          ============================================================
+          Paperless stack deployed successfully!
+          ============================================================
+
+          📄 Paperless-NGX : http://192.168.0.111:8010
+          🤖 Paperless-AI  : http://192.168.0.111:3000
+
+          ⚡ NEXT STEPS (one-time setup):
+          1. Log in to Paperless-NGX → Admin → Token Authentication
+             → Add token for your admin user → copy the token value
+          2. SSH to ubuntu-1 and edit /home/hugo/paperless/.env:
+               PAPERLESS_API_TOKEN=<paste token here>
+          3. Run this playbook again (step 4 re-copies the .env)
+             OR manually restart paperless_ai container:
+               docker restart paperless_ai
+          4. Open Paperless-AI at http://192.168.0.111:3000
+             and complete the setup wizard (AI provider, model, etc.)
+
+          📁 Consume directory (drop documents here to auto-import):
+               /home/hugo/paperless/consume
+          ============================================================
