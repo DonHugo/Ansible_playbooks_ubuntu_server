@@ -1,0 +1,142 @@
+---
+# ============================================================
+# Deploy go2rtc on ubuntu_2
+#
+# USB camera RTSP restream service.
+# Captures MJPEG from LifeCam Studio, transcodes to H.264,
+# serves RTSP on the host LAN address.
+#
+# Prerequisites:
+#   - USB camera connected and visible at stable device path
+# ============================================================
+
+- name: Deploy go2rtc USB camera bridge
+  hosts: ubuntu_2
+  become: true
+
+  tasks:
+
+    # ----------------------------------------------------------
+    # 1. Verify USB camera device exists
+    # ----------------------------------------------------------
+    - name: Check that USB camera device exists
+      ansible.builtin.stat:
+        path: /dev/v4l/by-id/usb-Microsoft_Microsoft®_LifeCam_Studio_TM_-video-index0
+      register: camera_device
+
+    - name: Fail if USB camera device is missing
+      ansible.builtin.fail:
+        msg: >
+          USB camera not found at expected stable path.
+          Verify the camera is connected and run
+          'ls -la /dev/v4l/by-id/' to check available devices.
+      when: not camera_device.stat.exists
+
+    # ----------------------------------------------------------
+    # 2. Create config directory
+    # ----------------------------------------------------------
+    - name: Create go2rtc config directory
+      ansible.builtin.file:
+        path: /home/hugo/go2rtc/config
+        state: directory
+        owner: hugo
+        group: hugo
+        mode: "0775"
+
+    # ----------------------------------------------------------
+    # 3. Ensure docker-compose plugin is installed
+    # ----------------------------------------------------------
+    - name: Install docker-compose-plugin
+      ansible.builtin.apt:
+        name: docker-compose-plugin
+        state: present
+        update_cache: true
+
+    # ----------------------------------------------------------
+    # 4. Clone / update repository
+    # ----------------------------------------------------------
+    - name: Clone ansible setup github repository  # noqa latest[git]
+      ansible.builtin.git:
+        repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+        clone: true
+        update: true
+
+    # ----------------------------------------------------------
+    # 5. Stage the current controller checkout and persistent config
+    # ----------------------------------------------------------
+    - name: Create go2rtc Compose project directory
+      ansible.builtin.file:
+        path: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/go2rtc
+        state: directory
+        mode: "0755"
+
+    - name: Copy go2rtc Compose definition from controller
+      ansible.builtin.copy:
+        src: ../docker/go2rtc/docker-compose.yml
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/go2rtc/docker-compose.yml
+        mode: "0644"
+      register: compose_definition
+
+    - name: Copy go2rtc.yaml to persistent config directory
+      ansible.builtin.copy:
+        src: ../docker/go2rtc/go2rtc.yaml
+        dest: /home/hugo/go2rtc/config/go2rtc.yaml
+        owner: hugo
+        group: hugo
+        mode: "0644"
+      register: config_copy
+
+    - name: Write non-secret go2rtc Compose environment
+      ansible.builtin.copy:
+        content: "GO2RTC_BIND_ADDRESS={{ ansible_host }}\n"
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/go2rtc/.env
+        owner: hugo
+        group: hugo
+        mode: "0644"
+      register: compose_environment
+
+    - name: Display config copy result
+      ansible.builtin.debug:
+        var: config_copy
+
+    # ----------------------------------------------------------
+    # 6. Pull image and start go2rtc
+    # ----------------------------------------------------------
+    - name: Create and start go2rtc stack
+      community.docker.docker_compose_v2:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/go2rtc/
+        state: present
+        pull: always
+        remove_orphans: true
+        recreate: >-
+          {{ 'always' if config_copy.changed or compose_definition.changed or
+          compose_environment.changed else 'auto' }}
+      register: compose_output
+
+    - name: Display compose deployment result
+      ansible.builtin.debug:
+        var: compose_output
+
+    # ----------------------------------------------------------
+    # 7. Verify RTSP port is listening
+    # ----------------------------------------------------------
+    - name: Wait for go2rtc RTSP port
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: 8554
+        timeout: 30
+      register: rtsp_check
+
+    - name: Display deployment result
+      ansible.builtin.debug:
+        msg: |
+          ============================================================
+          go2rtc deployed on ubuntu_2
+          ============================================================
+
+          📹 RTSP stream: rtsp://{{ ansible_host }}:8554/usb_camera
+          📋 Config: /home/hugo/go2rtc/config/go2rtc.yaml
+
+          Test with: ffprobe rtsp://{{ ansible_host }}:8554/usb_camera
+          ============================================================

@@ -1,0 +1,117 @@
+---
+# ============================================================
+# Frigate 0.17 configuration — ubuntu_main
+#
+# Single camera: USB webcam on ubuntu_2 via go2rtc RTSP restream
+# Detection: CPU-only (person only)
+# Recording: motion/alert events only, no continuous
+# ============================================================
+
+version: "0.17-0"
+
+# ----------------------------------------------------------
+# MQTT — Home Assistant integration
+# ----------------------------------------------------------
+mqtt:
+  enabled: true
+  host: "{FRIGATE_MQTT_HOST}"
+  port: 1883
+  topic_prefix: "frigate"
+  client_id: "frigate_ubuntu1"
+  user: "{FRIGATE_MQTT_USER}"
+  password: "{FRIGATE_MQTT_PASSWORD}"
+
+# Authenticated HTTP UI/API on port 8971. Port 5000 is not published.
+tls:
+  enabled: false
+
+auth:
+  enabled: true
+
+# ----------------------------------------------------------
+# Detector — OpenVINO on CPU (Intel i7-3770S, 4C/8T)
+# HD Graphics 4000 is too old for official OpenVINO GPU support.
+# ----------------------------------------------------------
+detectors:
+  ov_cpu:
+    type: openvino
+    device: CPU
+
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  path: /openvino-model/ssdlite_mobilenet_v2.xml
+  labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+
+# ----------------------------------------------------------
+# Integrated go2rtc — local restream
+# Receives RTSP from ubuntu_2 go2rtc instance
+# ----------------------------------------------------------
+go2rtc:
+  streams:
+    usb_ubuntu2:
+      - "{FRIGATE_USB_CAMERA_RTSP_URL}"
+
+# ----------------------------------------------------------
+# Camera: USB webcam (via ubuntu_2 restream)
+# ----------------------------------------------------------
+cameras:
+  usb_ubuntu2:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: "rtsp://127.0.0.1:8554/usb_ubuntu2"
+          roles:
+            - detect
+            - record
+      input_args: preset-rtsp-restream
+
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
+
+    objects:
+      track:
+        - person
+
+    # --- Review: only alert on person, disable detections ---
+    review:
+      alerts:
+        required_zones: []
+        labels:
+          - person
+      detections:
+        enabled: false
+
+    # --- Recording: event-driven only ---
+    record:
+      enabled: true
+      continuous:
+        days: 0
+      motion:
+        days: 0
+      alerts:
+        retain:
+          days: 7
+          mode: "active_objects"
+      detections:
+        retain:
+          days: 0
+          mode: "active_objects"
+
+    # --- Snapshots ---
+    snapshots:
+      enabled: true
+      retain:
+        default: 7
+        objects:
+          person: 7
+
+# ----------------------------------------------------------
+# Birdseye — disabled to save CPU
+# ----------------------------------------------------------
+birdseye:
+  enabled: false

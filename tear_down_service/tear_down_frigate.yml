@@ -1,0 +1,28 @@
+---
+# ============================================================
+# Tear down Frigate NVR on ubuntu_main
+# Config and media directories are always preserved.
+# ============================================================
+
+- name: Tear down Frigate while preserving data
+  hosts: ubuntu_main
+  become: true
+  tasks:
+
+    - name: Stop and remove Frigate via docker compose
+      community.docker.docker_compose_v2:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/frigate/
+        state: absent
+        remove_orphans: true
+      register: down_output
+
+    - name: Display compose down output
+      ansible.builtin.debug:
+        var: down_output
+
+    - name: Display teardown result
+      ansible.builtin.debug:
+        msg: |
+          Frigate removed from ubuntu_main.
+          Data directories: PRESERVED at /home/hugo/frigate/
+          Media recordings: PRESERVED at /home/hugo/frigate/media/

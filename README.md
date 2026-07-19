@@ -36,6 +36,7 @@ Collection of Ansible playbooks for Ubuntu server management, Docker services, a
 ├── tear_down_service/          # Cleanup operations
 ├── nfs_project/                # NFS infrastructure
 ├── docker/                     # Docker compose files
+├── docs/                       # Service documentation
 └── inventory/                  # Ansible inventory files
 ```
 
@@ -55,6 +56,7 @@ This project is designed to work with [Semaphore](https://github.com/ansible-sem
 - **Docker Services**: `deploy_docker_service/deploy_*.yml`
 - **Backup Operations**: `backup_service/backup_*.yml`
 - **NFS Setup**: `nfs_project/setup_nfs_server.yml`
+- **Camera/NVR**: See [docs/camera_nvr.md](docs/camera_nvr.md)
 
 ## Security Notes
 

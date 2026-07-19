@@ -1,0 +1,159 @@
+---
+# ============================================================
+# Deploy Frigate NVR on ubuntu_main
+#
+# CPU-only object detection. Receives RTSP from go2rtc on ubuntu_2.
+#
+# Prerequisites:
+#   1. go2rtc must be running on ubuntu_2
+#   2. /home/hugo/frigate/.env must exist with MQTT credentials
+#      (copy .env.example and fill in real values)
+# ============================================================
+
+- name: Deploy Frigate NVR
+  hosts: ubuntu_main
+  become: true
+
+  tasks:
+
+    # ----------------------------------------------------------
+    # 1. Create Frigate data directories
+    # ----------------------------------------------------------
+    - name: Create frigate directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: hugo
+        group: hugo
+        mode: "0775"
+      loop:
+        - /home/hugo/frigate
+        - /home/hugo/frigate/config
+        - /home/hugo/frigate/media
+
+    # ----------------------------------------------------------
+    # 2. Verify .env file exists (must be pre-created with creds)
+    # ----------------------------------------------------------
+    - name: Check that frigate .env file exists
+      ansible.builtin.stat:
+        path: /home/hugo/frigate/.env
+      register: env_file
+
+    - name: Fail if frigate .env is missing
+      ansible.builtin.fail:
+        msg: >
+          /home/hugo/frigate/.env not found.
+          Copy .env.example to /home/hugo/frigate/.env and fill in
+          the required network values and MQTT credentials before deploying.
+      when: not env_file.stat.exists
+
+    # ----------------------------------------------------------
+    # 3. Ensure docker-compose plugin is installed
+    # ----------------------------------------------------------
+    - name: Install docker-compose-plugin
+      ansible.builtin.apt:
+        name: docker-compose-plugin
+        state: present
+        update_cache: true
+
+    # ----------------------------------------------------------
+    # 4. Clone / update repository
+    # ----------------------------------------------------------
+    - name: Clone ansible setup github repository  # noqa latest[git]
+      ansible.builtin.git:
+        repo: https://github.com/DonHugo/Ansible_playbooks_ubuntu_server.git
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server
+        clone: true
+        update: true
+
+    # ----------------------------------------------------------
+    # 5. Stage the current controller checkout and persistent config
+    # ----------------------------------------------------------
+    - name: Create Frigate Compose project directory
+      ansible.builtin.file:
+        path: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/frigate
+        state: directory
+        mode: "0755"
+
+    - name: Copy Frigate Compose definition from controller
+      ansible.builtin.copy:
+        src: ../docker/frigate/docker-compose.yml
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/frigate/docker-compose.yml
+        mode: "0644"
+      register: compose_definition
+
+    - name: Copy Frigate config.yml to persistent config directory
+      ansible.builtin.copy:
+        src: ../docker/frigate/config.yml
+        dest: /home/hugo/frigate/config/config.yml
+        owner: hugo
+        group: hugo
+        mode: "0644"
+      register: config_copy
+
+    - name: Display config copy result
+      ansible.builtin.debug:
+        var: config_copy
+
+    # ----------------------------------------------------------
+    # 6. Copy .env to compose project directory (no content log)
+    # ----------------------------------------------------------
+    - name: Copy frigate .env to compose directory
+      ansible.builtin.copy:
+        src: /home/hugo/frigate/.env
+        dest: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/frigate/.env
+        owner: hugo
+        group: hugo
+        mode: "0600"
+        remote_src: true
+      register: compose_environment
+      no_log: true
+
+    # ----------------------------------------------------------
+    # 7. Pull image and start Frigate
+    # ----------------------------------------------------------
+    - name: Create and start Frigate stack
+      community.docker.docker_compose_v2:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/frigate/
+        state: present
+        pull: always
+        remove_orphans: true
+        recreate: >-
+          {{ 'always' if config_copy.changed or compose_definition.changed or
+          compose_environment.changed else 'auto' }}
+      register: compose_output
+
+    - name: Display compose deployment result
+      ansible.builtin.debug:
+        var: compose_output
+
+    # ----------------------------------------------------------
+    # 8. Wait for Frigate web UI
+    # ----------------------------------------------------------
+    - name: Wait for Frigate web UI on port 8971
+      ansible.builtin.uri:
+        url: "http://{{ ansible_host }}:8971"
+        status_code: [200, 401]
+        follow_redirects: true
+      register: frigate_health
+      retries: 12
+      delay: 10
+      until: frigate_health.status in [200, 401]
+
+    # ----------------------------------------------------------
+    # 9. Post-deploy info
+    # ----------------------------------------------------------
+    - name: Display deployment result
+      ansible.builtin.debug:
+        msg: |
+          ============================================================
+          Frigate NVR deployed on ubuntu_main
+          ============================================================
+
+          🎥 Web UI:  http://{{ ansible_host }}:8971
+          📹 RTSP:    rtsp://{{ ansible_host }}:8554/usb_ubuntu2
+          📁 Media:   /home/hugo/frigate/media
+          📋 Config:  /home/hugo/frigate/config/config.yml
+
+          MQTT broker: configured by FRIGATE_MQTT_HOST on port 1883 (topic: frigate/#)
+          ============================================================

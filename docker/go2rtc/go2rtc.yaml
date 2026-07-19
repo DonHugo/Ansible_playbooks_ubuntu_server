@@ -1,0 +1,22 @@
+---
+# ============================================================
+# go2rtc configuration — ubuntu_2
+#
+# USB camera: Microsoft LifeCam Studio
+#   - No native H.264; captures YUYV 1280x720 10fps
+#   - Software H.264 transcode and 180° rotation via FFmpeg
+# ============================================================
+
+# Disable web API entirely (security: no management interface exposed)
+api:
+  listen: ""
+
+# RTSP server on all interfaces (Docker port binding restricts to LAN IP)
+rtsp:
+  listen: ":8554"
+
+# Camera streams
+streams:
+  usb_camera:
+    # YUYV fixes LifeCam purple tint; rotate=180 corrects upside-down mount
+    - "ffmpeg:device?video=/dev/video0&input_format=yuyv422&video_size=1280x720&framerate=10#video=h264#rotate=180"

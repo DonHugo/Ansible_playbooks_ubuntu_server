@@ -1,0 +1,47 @@
+---
+# ============================================================
+# go2rtc — USB camera RTSP restream on ubuntu_2
+#
+# Captures MJPEG from USB camera, transcodes to H.264,
+# and serves RTSP on the ubuntu-2 LAN address.
+#
+# Image: go2rtc 1.9.14 (pinned digest)
+# ============================================================
+
+services:
+
+  go2rtc:
+    container_name: go2rtc
+    image: alexxit/go2rtc:1.9.14@sha256:675c318b23c06fd862a61d262240c9a63436b4050d177ffc68a32710d9e05bae
+    restart: unless-stopped
+    stop_grace_period: 10s
+
+    # --- Security hardening ---
+    security_opt:
+      - no-new-privileges=true
+    cap_drop:
+      - ALL
+    read_only: true
+
+    # --- Camera device (stable by-id path → /dev/video0) ---
+    devices:
+      - "/dev/v4l/by-id/usb-Microsoft_Microsoft®_LifeCam_Studio_TM_-video-index0:/dev/video0"
+
+    # --- Only expose RTSP on LAN IP ---
+    ports:
+      - "${GO2RTC_BIND_ADDRESS:?GO2RTC_BIND_ADDRESS must be set}:8554:8554/tcp"
+
+    # --- Config mount ---
+    volumes:
+      - /home/hugo/go2rtc/config/go2rtc.yaml:/config/go2rtc.yaml:ro
+
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid,nodev
+
+    # --- Healthcheck: TCP probe on RTSP port ---
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 8554 || exit 1"]
+      start_period: 10s
+      interval: 30s
+      retries: 3
+      timeout: 5s

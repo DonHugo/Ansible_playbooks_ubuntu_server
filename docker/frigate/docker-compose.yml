@@ -1,0 +1,51 @@
+---
+# ============================================================
+# Frigate NVR on ubuntu_main
+#
+# OpenVINO CPU object detection (no GPU/coral).
+# Receives RTSP stream from go2rtc on ubuntu_2.
+#
+# Image: Frigate 0.17.2 (pinned digest)
+#
+# Prerequisites:
+#   1. Copy .env.example → /home/hugo/frigate/.env and fill MQTT creds
+#   2. go2rtc must be running on ubuntu_2 before starting
+# ============================================================
+
+services:
+
+  frigate:
+    container_name: frigate
+    image: ghcr.io/blakeblackshear/frigate:0.17.2@sha256:d4351369984d4a9e2a49ac59736f6490856a7ea11f7790040746d21496967010
+    restart: unless-stopped
+    stop_grace_period: 30s
+    # Frigate runtime calculation recommends >=146MB for this 720p camera.
+    shm_size: "192mb"
+
+    environment:
+      TZ: "Europe/Stockholm"
+      FRIGATE_MQTT_HOST: "${FRIGATE_MQTT_HOST:?FRIGATE_MQTT_HOST must be set}"
+      FRIGATE_MQTT_USER: "${FRIGATE_MQTT_USER:?FRIGATE_MQTT_USER must be set}"
+      FRIGATE_MQTT_PASSWORD: "${FRIGATE_MQTT_PASSWORD:?FRIGATE_MQTT_PASSWORD must be set}"
+      FRIGATE_USB_CAMERA_RTSP_URL: "${FRIGATE_USB_CAMERA_RTSP_URL:?FRIGATE_USB_CAMERA_RTSP_URL must be set}"
+
+    # --- Ports: bind to LAN IP only ---
+    ports:
+      # Authenticated UI/API
+      - "${FRIGATE_BIND_ADDRESS:?FRIGATE_BIND_ADDRESS must be set}:8971:8971/tcp"
+      # RTSP restream
+      - "${FRIGATE_BIND_ADDRESS:?FRIGATE_BIND_ADDRESS must be set}:8554:8554/tcp"
+      # WebRTC
+      - "${FRIGATE_BIND_ADDRESS:?FRIGATE_BIND_ADDRESS must be set}:8555:8555/tcp"
+      - "${FRIGATE_BIND_ADDRESS:?FRIGATE_BIND_ADDRESS must be set}:8555:8555/udp"
+
+    # --- Volumes ---
+    volumes:
+      - /home/hugo/frigate/config:/config
+      - /home/hugo/frigate/media:/media/frigate
+      - type: tmpfs
+        target: /tmp/cache
+        tmpfs:
+          size: 1073741824    # 1 GB
+
+# No privileged mode or host devices are needed for OpenVINO CPU detection.

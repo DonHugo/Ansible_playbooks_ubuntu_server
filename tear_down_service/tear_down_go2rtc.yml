@@ -1,0 +1,27 @@
+---
+# ============================================================
+# Tear down go2rtc on ubuntu_2
+# Config directory is always preserved.
+# ============================================================
+
+- name: Tear down go2rtc while preserving data
+  hosts: ubuntu_2
+  become: true
+  tasks:
+
+    - name: Stop and remove go2rtc via docker compose
+      community.docker.docker_compose_v2:
+        project_src: /home/ansible/repos/Ansible_playbooks_ubuntu_server/docker/go2rtc/
+        state: absent
+        remove_orphans: true
+      register: down_output
+
+    - name: Display compose down output
+      ansible.builtin.debug:
+        var: down_output
+
+    - name: Display teardown result
+      ansible.builtin.debug:
+        msg: |
+          go2rtc removed from ubuntu_2.
+          Config directory: PRESERVED at /home/hugo/go2rtc/
