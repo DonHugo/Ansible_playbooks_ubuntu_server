@@ -135,6 +135,9 @@ services:
       PAPERLESS_ALLOWED_HOSTS: ${PAPERLESS_ALLOWED_HOSTS:-paperless-ngx,192.168.0.111,localhost,127.0.0.1}
       PAPERLESS_TIME_ZONE: ${TZ:-Europe/Stockholm}
       PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-eng}
+      # Paperless-AI handles metadata classification in this stack, so disable
+      # the separate built-in classifier training job and its empty-data alerts.
+      PAPERLESS_TRAIN_TASK_CRON: ${PAPERLESS_TRAIN_TASK_CRON:-disable}
       PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-admin}
       PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
       PAPERLESS_ADMIN_MAIL: ${PAPERLESS_ADMIN_MAIL:-admin@localhost}
